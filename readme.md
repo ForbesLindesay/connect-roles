@@ -27,14 +27,14 @@ Connect Roles assumes that you have authentication middleware to set the user.  
 
 To define authentication strategies, call the authStrategy function:
 
-@param [path] {string}   The action/path/ability/role that this strategy applies to.  The strategy will be ignored for all other roles/abilities.  If it is not present, the strategy is used for all roles/abilities.
-@param fn     {function} The function to call to determine whether the user is authorized.
-@param fn.this           {object}   The value of this inside the function is the current request, useful for dynamic authorization.
-@param fn.user           {object}   The user found at req.user (also available as this.user), note that this could be null/undefined if the user is not authenticated.
-@param fn.action         {string}   The action/role/ability etc. that we are checking permission for.
-@param fn.stop           {function} A function which can be called with or without the vote to make this the last strategy which is used (see anonymous example).
-@param [fn.stop.vote]         {boolean} The vote, true, false or null as below.
-@param [fn.returns vote] {boolean}  The function can optionally return a vote, if this is false, then access will be denied, if this is true and nothing returns false, access will be granted.
+@param [path] {string}   The action/path/ability/role that this strategy applies to.  The strategy will be ignored for all other roles/abilities.  If it is not present, the strategy is used for all roles/abilities.  
+@param fn     {function} The function to call to determine whether the user is authorized.  
+@param fn.this           {object}   The value of this inside the function is the current request, useful for dynamic authorization.  
+@param fn.user           {object}   The user found at req.user (also available as this.user), note that this could be null/undefined if the user is not authenticated.  
+@param fn.action         {string}   The action/role/ability etc. that we are checking permission for.  
+@param fn.stop           {function} A function which can be called with or without the vote to make this the last strategy which is used (see anonymous example).  
+@param [fn.stop.vote]         {boolean} The vote, true, false or null as below.  
+@param [fn.returns vote] {boolean}  The function can optionally return a vote, if this is false, then access will be denied, if this is true and nothing returns false, access will be granted.  
  
 ```javascript
 user.authStrategy(function(user, action, stop){
