@@ -25,7 +25,7 @@ Connect Roles assumes that you have authentication middleware to set the user.  
 
 ## Defining authentication strategies
 
-To define authentication strategies, call the authStrategy function:
+To define authentication strategies, call the useAuthorisationStrategy function:
 
 @param [path] {string}   The action/path/ability/role that this strategy applies to.  The strategy will be ignored for all other roles/abilities.  If it is not present, the strategy is used for all roles/abilities.  
 @param fn     {function} The function to call to determine whether the user is authorized.  
@@ -37,13 +37,13 @@ To define authentication strategies, call the authStrategy function:
 @param [fn.returns vote] {boolean}  The function can optionally return a vote, if this is false, then access will be denied, if this is true and nothing returns false, access will be granted.  
  
 ```javascript
-user.authStrategy(function(user, action, stop){
+user.useAuthorisationStrategy(function(user, action, stop){
 	//User logic here.
 });
 
 //Or
 
-user.authStrategy("create user", function(user, action, stop){
+user.useAuthorisationStrategy("create user", function(user, action, stop){
 	//User logic here.
 });
 ```
@@ -55,12 +55,12 @@ You should probably handle anonymous users first.  This is important because it 
 If you have anything that an anonymous user is capeable of, you must then check before checking for "anonymous".
 
 ```javascript
-user.authStrategy("register", function(user){
-	if(!user) return true;
+user.useAuthorisationStrategy("register", function(user){
+	if(!user.isAuthenticated) return true;
 });
 
-user.authStrategy(function(user, action, stop){
-	if(!user){
+user.useAuthorisationStrategy(function(user, action, stop){
+	if(!user.isAuthenticated){
 		stop(action === "anonymous");
 	}
 });
@@ -71,8 +71,8 @@ user.authStrategy(function(user, action, stop){
 If you have a user object which looks like `{id:10, roles:["RoleA", "RoleB"]}` you could use the following to provide roles checking.
 
 ```javascript
-user.authStrategy(function(user, action){
-	if(user){//You can remove this if already checking for anonymous users
+user.useAuthorisationStrategy(function(user, action){
+	if(user.isAuthenticated){//You can remove this if already checking for anonymous users
 		for(var i = 0; i<user.roles.length; i++){
 			if(user.roles[i] === action) return true;
 		}
@@ -85,8 +85,8 @@ user.authStrategy(function(user, action){
 This example is what makes this library special.
 
 ```javascript
-user.authStrategy("edit user", function(user, action){
-	if(user){//You can remove this if already checking for anonymous users
+user.useAuthorisationStrategy("edit user", function(user, action){
+	if(user.isAuthenticated){//You can remove this if already checking for anonymous users
 		if(req.params.userid){
 			if(user.id === req.params.userid){
 				return true;
@@ -146,8 +146,8 @@ app.get("/admin*", user.is("admin"));
 ### Only let people edit themselves
 
 ```javascript
-user.authStrategy("edit user", function(user, action){
-	if(user){//You can remove this if already checking for anonymous users
+user.useAuthorisationStrategy("edit user", function(user, action){
+	if(user.isAuthenticated){//You can remove this if already checking for anonymous users
 		if(req.params.userid){
 			if(user.id === req.params.userid){
 				return true;
@@ -165,12 +165,12 @@ app.get('/user/:userid/edit', user.can("edit user"), function(req,res){
 ### Chain things
 
 ```javascript
-user.authStrategy("register", function(user){
-	if(!user) return true;
+user.useAuthorisationStrategy("register", function(user){
+	if(!user.isAuthenticated) return true;
 });
 
-user.authStrategy(function(user, action, stop){
-	if(!user){
+user.useAuthorisationStrategy(function(user, action, stop){
+	if(!user.isAuthenticated){
 		stop(action === "anonymous");
 	}
 });
@@ -206,4 +206,14 @@ user.setFailureHandler(function (req, res, action){
 		res.redirect('/login');
 	}
 });
+```
+
+## Default User
+
+By default, the user middleware will set the user up to be `{}` and will then add the property `isAuthenticated = false`.
+
+Roles will always add `isAuthenticated = false` but you can configure a default user object as follows.
+
+```javascript
+user.setDefaultUser({id:"anonymous"});
 ```
