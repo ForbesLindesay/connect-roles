@@ -2,10 +2,10 @@
 	"name": "connect-roles",
 	"description": "Provides dynamic roles based authentication for node.js connect and express servers.",
 	"version": "0.1.6",
-	"homepage": "http://documentup.com/Tuskan360/connect-roles",
+	"homepage": "http://documentup.com/ForbesLindesay/connect-roles",
 	"repository": {
 		"type":"git",
-		"url": "git://github.com/Tuskan360/connect-roles.git"
+		"url": "git://github.com/ForbesLindesay/connect-roles.git"
 	},
 	"main": "./index"
 }
