@@ -65,7 +65,7 @@ function tester(req){
 		}
     	for (var i = 0; i<functionList.length && !stop; i++){
     		var fn = functionList[i];
-        	vote = fn.call(req, req.user, action, stop);
+        	vote = fn.call(req, req.user, action, stopNow);
         	if(vote === false) return false;
         	else if (vote === true) result = true;
     	}
