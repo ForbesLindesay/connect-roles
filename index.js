@@ -12,8 +12,8 @@ module.exports = function middleware(req, res, next){
         req.user.isAuthenticated = false;
     }
     if(req.user){
-        req.user.is = tester(req);
-        req.user.can = tester(req);
+        req.user.is = tester(req,'is');
+        req.user.can = tester(req,'can');
     }
     next();
 };
@@ -21,8 +21,8 @@ module.exports = function middleware(req, res, next){
 
 module.exports.log = false;
 
-module.exports.can = routeTester;
-module.exports.is = routeTester;
+module.exports.can = routeTester('can');
+module.exports.is = routeTester('is');
 module.exports.isAuthenticated = function(req,res,next){
     if(arguments.length === 0) return module.exports.isAuthenticated;
     if (req.user && req.user.isAuthenticated) next();
@@ -51,7 +51,7 @@ module.exports.setDefaultUser = function(user){
 };
 
 
-function tester(req){
+function tester(req, verb){
     return function(action){
         var result = null,
         vote;
@@ -71,18 +71,20 @@ function tester(req){
                 result = true;
             }
         }
-        if(module.exports.log) console.log('Check Permission: ' + (req.user.id||req.user.name||"user") + ".can('" + action + "') -> " + (result === true));
+        if(module.exports.log)
+            console.log('Check Permission: ' + (req.user.id||req.user.name||"user") + "."+(verb||'can')+"('" + action + "') -> " + (result === true));
         return (result === true);
     }
 }
-
-function routeTester(action){    
-    return function(req,res,next){
-        if(tester(req)(action)){
-            next();
-        }else{
-            //Failed authentication.
-            failureHandler(req, res, action);    
-        }
-    };
-};
+function routeTester(verb){
+    return function (action){    
+        return function(req,res,next){
+            if(tester(req,verb)(action)){
+                next();
+            }else{
+                //Failed authentication.
+                failureHandler(req, res, action);    
+            }
+        };
+    }
+}
