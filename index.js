@@ -1,3 +1,5 @@
+"use strict";
+
 var functionList = [];
 var failureHandler = function (req, res, action){
     res.send(403);
@@ -24,19 +26,19 @@ module.exports.log = false;
 module.exports.can = routeTester('can');
 module.exports.is = routeTester('is');
 module.exports.isAuthenticated = function(req,res,next){
-    if(arguments.length === 0) return module.exports.isAuthenticated;
-    if (req.user && req.user.isAuthenticated) next();
-    else if(req.user) failureHandler(req, res, "isAuthenticated");
-    else throw "Request.user was null or undefined, include middleware";
+    if(arguments.length === 0){ return module.exports.isAuthenticated; }
+    if (req.user && req.user.isAuthenticated){ next(); }
+    else if(req.user){ failureHandler(req, res, "isAuthenticated"); }
+    else { throw "Request.user was null or undefined, include middleware"; }
 };
 
 module.exports.useAuthorisationStrategy = 
 module.exports.useAuthorizationStrategy = function(path, fn){
     if(typeof path === "function"){
-        fn = path
+        fn = path;
     }
     functionList.push(function(user, action, stop){
-            if(typeof path === "string" && path != action){
+            if(typeof path === "string" && path !== action){
                 return null;
             }
             return fn.call(this, user, action, stop);
@@ -58,8 +60,11 @@ function tester(req, verb){
         var stop = false;
         function stopNow(vote){
             stop = true;
-            if (vote === false) result = false;
-            else if (vote === true) result = true;
+            if (vote === false){ 
+                result = false;
+            } else if (vote === true) {
+                result = true;
+            }
         }
         for (var i = 0; i<functionList.length && !stop; i++){
             var fn = functionList[i];
@@ -71,10 +76,11 @@ function tester(req, verb){
                 result = true;
             }
         }
-        if(module.exports.log)
+        if(module.exports.log){
             console.log('Check Permission: ' + (req.user.id||req.user.name||"user") + "."+(verb||'can')+"('" + action + "') -> " + (result === true));
+        }
         return (result === true);
-    }
+    };
 }
 function routeTester(verb){
     return function (action){    
@@ -86,5 +92,5 @@ function routeTester(verb){
                 failureHandler(req, res, action);    
             }
         };
-    }
+    };
 }
