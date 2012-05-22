@@ -77,7 +77,8 @@ function tester(req, verb){
             }
         }
         if(module.exports.log){
-            console.log('Check Permission: ' + (req.user.id||req.user.name||"user") + "."+(verb||'can')+"('" + action + "') -> " + (result === true));
+            console.log('Check Permission: ' + (req.user.id||req.user.name||"user") +
+                "."+(verb||'can')+"('" + action + "') -> " + (result === true));
         }
         return (result === true);
     };
