@@ -1,0 +1,276 @@
+<!doctype html>
+<!-- The Time Machine GitHub pages theme was designed and developed by Jon Rohan, on Feb 7, 2012. -->
+<!-- Follow him for fun. http://twitter.com/jonrohan. Tail his code on http://github.com/jonrohan -->
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+
+  <link rel="stylesheet" href="stylesheets/stylesheet.css" media="screen"/>
+  <link rel="stylesheet" href="stylesheets/pygment_trac.css"/>
+  <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+  <script type="text/javascript" src="javascripts/script.js"></script>
+
+  <title>Connect-roles</title>
+  <meta name="description" content="Provides dynamic roles based authentication for node.js connect and express servers.">
+
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+
+</head>
+
+<body>
+
+  <div class="wrapper">
+    <header>
+      <h1 class="title">Connect-roles</h1>
+    </header>
+    <div id="container">
+      <p class="tagline">Provides dynamic roles based authentication for node.js connect and express servers.</p>
+      <div id="main" role="main">
+        <div class="download-bar">
+        <div class="inner">
+          <a href="https://github.com/ForbesLindesay/connect-roles/tarball/master" class="download-button tar"><span>Download</span></a>
+          <a href="https://github.com/ForbesLindesay/connect-roles/zipball/master" class="download-button zip"><span>Download</span></a>
+          <a href="https://github.com/ForbesLindesay/connect-roles" class="code">View Connect-roles on GitHub</a>
+        </div>
+        <span class="blc"></span><span class="trc"></span>
+        </div>
+        <article class="markdown-body">
+          <h1>Connect Roles</h1>
+
+<p>Connect roles is designed to work with connect or express.  It is an authorization provider, not an authentication provider.  It is designed to support context sensitive roles/abilities, through the use of middleware style authentication strategies.</p>
+
+<p>All code samples assume you have already used:</p>
+
+<div class="highlight"><pre><span class="kd">var</span> <span class="nx">app</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'express'</span><span class="p">).</span><span class="nx">createServer</span><span class="p">();</span><span class="c1">//could also use connect</span>
+<span class="kd">var</span> <span class="nx">user</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'connect-roles'</span><span class="p">);</span>
+
+<span class="nx">app</span><span class="p">.</span><span class="nx">use</span><span class="p">(</span><span class="cm">/* Your authentication middleware goes here */</span><span class="p">);</span>
+<span class="nx">app</span><span class="p">.</span><span class="nx">use</span><span class="p">(</span><span class="nx">user</span><span class="p">);</span><span class="c1">//Load the connect-roles middleware here</span>
+</pre></div>
+
+<p>For an example of this in use, see server.js (which requires you install express)</p>
+
+<h2>Installation</h2>
+
+<pre><code>npm install connect-roles
+</code></pre>
+
+<h2>Authorization</h2>
+
+<p>Connect Roles assumes that you have authentication middleware to set the user.  It expects the user to be on the request object as <code>req.user</code>.  It makes no assumptions about what this value contains.  If this value is not used, it does not matter as the authentication strategies also have access to the request object itself</p>
+
+<h2>Defining authentication strategies</h2>
+
+<p>To define authentication strategies, call the useAuthorisationStrategy function:</p>
+
+<p><a href="https://github.com/Param" class="user-mention">@Param</a> [path] {string}   The action/path/ability/role that this strategy applies to.  The strategy will be ignored for all other roles/abilities.  If it is not present, the strategy is used for all roles/abilities.<br>
+<a href="https://github.com/Param" class="user-mention">@Param</a> fn     {function} The function to call to determine whether the user is authorized.<br>
+<a href="https://github.com/Param" class="user-mention">@Param</a> fn.this           {object}   The value of this inside the function is the current request, useful for dynamic authorization.<br>
+<a href="https://github.com/Param" class="user-mention">@Param</a> fn.user           {object}   The user found at req.user (also available as this.user), note that this could be null/undefined if the user is not authenticated.<br>
+<a href="https://github.com/Param" class="user-mention">@Param</a> fn.action         {string}   The action/role/ability etc. that we are checking permission for.<br>
+<a href="https://github.com/Param" class="user-mention">@Param</a> fn.stop           {function} A function which can be called with or without the vote to make this the last strategy which is used (see anonymous example).<br>
+<a href="https://github.com/Param" class="user-mention">@Param</a> [fn.stop.vote]         {boolean} The vote, true, false or null as below.<br>
+<a href="https://github.com/Param" class="user-mention">@Param</a> [fn.returns vote] {boolean}  The function can optionally return a vote, if this is false, then access will be denied, if this is true and nothing returns false, access will be granted.  </p>
+
+<div class="highlight"><pre><span class="nx">user</span><span class="p">.</span><span class="nx">useAuthorisationStrategy</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">user</span><span class="p">,</span> <span class="nx">action</span><span class="p">,</span> <span class="nx">stop</span><span class="p">){</span>
+  <span class="c1">//User logic here.</span>
+<span class="p">});</span>
+
+<span class="c1">//Or</span>
+
+<span class="nx">user</span><span class="p">.</span><span class="nx">useAuthorisationStrategy</span><span class="p">(</span><span class="s2">"create user"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">user</span><span class="p">,</span> <span class="nx">action</span><span class="p">,</span> <span class="nx">stop</span><span class="p">){</span>
+  <span class="c1">//User logic here.</span>
+<span class="p">});</span>
+</pre></div>
+
+<h3>Anonymous User</h3>
+
+<p>You should probably handle anonymous users first.  This is important because it means you then won't have to handle anonymous users individually in every other function, providing you call stop.</p>
+
+<p>If you have anything that an anonymous user is capeable of, you must then check before checking for "anonymous".</p>
+
+<div class="highlight"><pre><span class="nx">user</span><span class="p">.</span><span class="nx">useAuthorisationStrategy</span><span class="p">(</span><span class="s2">"register"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">user</span><span class="p">){</span>
+  <span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="nx">user</span><span class="p">.</span><span class="nx">isAuthenticated</span><span class="p">)</span> <span class="k">return</span> <span class="kc">true</span><span class="p">;</span>
+<span class="p">});</span>
+
+<span class="nx">user</span><span class="p">.</span><span class="nx">useAuthorisationStrategy</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">user</span><span class="p">,</span> <span class="nx">action</span><span class="p">,</span> <span class="nx">stop</span><span class="p">){</span>
+  <span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="nx">user</span><span class="p">.</span><span class="nx">isAuthenticated</span><span class="p">){</span>
+    <span class="nx">stop</span><span class="p">(</span><span class="nx">action</span> <span class="o">===</span> <span class="s2">"anonymous"</span><span class="p">);</span>
+  <span class="p">}</span>
+<span class="p">});</span>
+</pre></div>
+
+<h3>Roles</h3>
+
+<p>If you have a user object which looks like <code>{id:10, roles:["RoleA", "RoleB"]}</code> you could use the following to provide roles checking.</p>
+
+<div class="highlight"><pre><span class="nx">user</span><span class="p">.</span><span class="nx">useAuthorisationStrategy</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">user</span><span class="p">,</span> <span class="nx">action</span><span class="p">){</span>
+  <span class="k">if</span><span class="p">(</span><span class="nx">user</span><span class="p">.</span><span class="nx">isAuthenticated</span><span class="p">){</span><span class="c1">//You can remove this if already checking for anonymous users</span>
+    <span class="k">for</span><span class="p">(</span><span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span><span class="o">&lt;</span><span class="nx">user</span><span class="p">.</span><span class="nx">roles</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">){</span>
+      <span class="k">if</span><span class="p">(</span><span class="nx">user</span><span class="p">.</span><span class="nx">roles</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span> <span class="o">===</span> <span class="nx">action</span><span class="p">)</span> <span class="k">return</span> <span class="kc">true</span><span class="p">;</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+<span class="p">});</span>
+</pre></div>
+
+<h3>Dynamic</h3>
+
+<p>This example is what makes this library special.</p>
+
+<div class="highlight"><pre><span class="nx">user</span><span class="p">.</span><span class="nx">useAuthorisationStrategy</span><span class="p">(</span><span class="s2">"edit user"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">user</span><span class="p">,</span> <span class="nx">action</span><span class="p">){</span>
+  <span class="k">if</span><span class="p">(</span><span class="nx">user</span><span class="p">.</span><span class="nx">isAuthenticated</span><span class="p">){</span><span class="c1">//You can remove this if already checking for anonymous users</span>
+    <span class="k">if</span><span class="p">(</span><span class="nx">req</span><span class="p">.</span><span class="nx">params</span><span class="p">.</span><span class="nx">userid</span><span class="p">){</span>
+      <span class="k">if</span><span class="p">(</span><span class="nx">user</span><span class="p">.</span><span class="nx">id</span> <span class="o">===</span> <span class="nx">req</span><span class="p">.</span><span class="nx">params</span><span class="p">.</span><span class="nx">userid</span><span class="p">){</span>
+        <span class="k">return</span> <span class="kc">true</span><span class="p">;</span>
+      <span class="p">}</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+<span class="p">});</span>
+
+<span class="c1">//Then you can use the following in express</span>
+<span class="nx">app</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">'/user/:userid/edit'</span><span class="p">,</span> <span class="nx">user</span><span class="p">.</span><span class="nx">can</span><span class="p">(</span><span class="s2">"edit user"</span><span class="p">),</span> <span class="kd">function</span><span class="p">(</span><span class="nx">req</span><span class="p">,</span><span class="nx">res</span><span class="p">){</span>
+  <span class="c1">//Only called if the user is editing themselves, not other people.</span>
+<span class="p">});</span>
+</pre></div>
+
+<h2>Inline authorization for connect or express</h2>
+
+<p>Providing you have supplied the middleware (see the first section of this guide) you can use the following functions.</p>
+
+<h3>req.isAuthenticated</h3>
+
+<p>This is a property that is either true or false to tell you whether the user object is present.</p>
+
+<h3>req.userIs, req.userCan, req.user.can, req.user.is</h3>
+
+<p>These functions are all the same, but be aware that methods of the form req.user.* will throw exceptions if user is null.</p>
+
+<div class="highlight"><pre><span class="nx">app</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s2">"/canifly"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">req</span><span class="p">,</span><span class="nx">res</span><span class="p">){</span>
+  <span class="k">if</span><span class="p">(</span><span class="nx">req</span><span class="p">.</span><span class="nx">userCan</span><span class="p">(</span><span class="s2">"fly"</span><span class="p">))</span> <span class="nx">res</span><span class="p">.</span><span class="nx">send</span><span class="p">(</span><span class="s2">"You can fly"</span><span class="p">);</span>
+  <span class="k">else</span> <span class="nx">res</span><span class="p">.</span><span class="nx">send</span><span class="p">(</span><span class="s2">"You can't fly"</span><span class="p">);</span>
+<span class="p">});</span>
+
+<span class="nx">app</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s2">"/logout"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">req</span><span class="p">,</span><span class="nx">res</span><span class="p">){</span>
+    <span class="c1">//Note how we check authenticated first.</span>
+  <span class="k">if</span><span class="p">(</span><span class="nx">req</span><span class="p">.</span><span class="nx">isAuthenticated</span> <span class="o">&amp;&amp;</span> <span class="nx">req</span><span class="p">.</span><span class="nx">user</span><span class="p">.</span><span class="nx">can</span><span class="p">(</span><span class="s2">"logout"</span><span class="p">)){</span>
+    <span class="nx">logout</span><span class="p">();</span>
+  <span class="p">}</span><span class="k">else</span><span class="p">{</span>
+    <span class="k">throw</span> <span class="s2">"user can't log out"</span><span class="p">;</span>
+  <span class="p">}</span>
+<span class="p">});</span>
+</pre></div>
+
+<h2>Route middleware for express</h2>
+
+<p>In express you can provide route middleware.  This is perfect for authentication, especially with wildcards.</p>
+
+<h3>Protect entire admin section in one line</h3>
+
+<p>Simply put this before you have any other routes beginning /admin</p>
+
+<div class="highlight"><pre><span class="nx">app</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s2">"/admin*"</span><span class="p">,</span> <span class="nx">user</span><span class="p">.</span><span class="nx">is</span><span class="p">(</span><span class="s2">"admin"</span><span class="p">));</span>
+</pre></div>
+
+<h3>Only let people edit themselves</h3>
+
+<div class="highlight"><pre><span class="nx">user</span><span class="p">.</span><span class="nx">useAuthorisationStrategy</span><span class="p">(</span><span class="s2">"edit user"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">user</span><span class="p">,</span> <span class="nx">action</span><span class="p">){</span>
+  <span class="k">if</span><span class="p">(</span><span class="nx">user</span><span class="p">.</span><span class="nx">isAuthenticated</span><span class="p">){</span><span class="c1">//You can remove this if already checking for anonymous users</span>
+    <span class="k">if</span><span class="p">(</span><span class="nx">req</span><span class="p">.</span><span class="nx">params</span><span class="p">.</span><span class="nx">userid</span><span class="p">){</span>
+      <span class="k">if</span><span class="p">(</span><span class="nx">user</span><span class="p">.</span><span class="nx">id</span> <span class="o">===</span> <span class="nx">req</span><span class="p">.</span><span class="nx">params</span><span class="p">.</span><span class="nx">userid</span><span class="p">){</span>
+        <span class="k">return</span> <span class="kc">true</span><span class="p">;</span>
+      <span class="p">}</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+<span class="p">});</span>
+
+<span class="c1">//Then you can use the following in express</span>
+<span class="nx">app</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">'/user/:userid/edit'</span><span class="p">,</span> <span class="nx">user</span><span class="p">.</span><span class="nx">can</span><span class="p">(</span><span class="s2">"edit user"</span><span class="p">),</span> <span class="kd">function</span><span class="p">(</span><span class="nx">req</span><span class="p">,</span><span class="nx">res</span><span class="p">){</span>
+  <span class="c1">//Only called if the user is editing themselves, not other people.</span>
+<span class="p">});</span>
+</pre></div>
+
+<h3>Chain things</h3>
+
+<div class="highlight"><pre><span class="nx">user</span><span class="p">.</span><span class="nx">useAuthorisationStrategy</span><span class="p">(</span><span class="s2">"register"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">user</span><span class="p">){</span>
+  <span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="nx">user</span><span class="p">.</span><span class="nx">isAuthenticated</span><span class="p">)</span> <span class="k">return</span> <span class="kc">true</span><span class="p">;</span>
+<span class="p">});</span>
+
+<span class="nx">user</span><span class="p">.</span><span class="nx">useAuthorisationStrategy</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">user</span><span class="p">,</span> <span class="nx">action</span><span class="p">,</span> <span class="nx">stop</span><span class="p">){</span>
+  <span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="nx">user</span><span class="p">.</span><span class="nx">isAuthenticated</span><span class="p">){</span>
+    <span class="nx">stop</span><span class="p">(</span><span class="nx">action</span> <span class="o">===</span> <span class="s2">"anonymous"</span><span class="p">);</span>
+  <span class="p">}</span>
+<span class="p">});</span>
+
+<span class="nx">app</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s2">"/register"</span><span class="p">,</span> <span class="nx">user</span><span class="p">.</span><span class="nx">is</span><span class="p">(</span><span class="s2">"anonymous"</span><span class="p">),</span> <span class="nx">user</span><span class="p">.</span><span class="nx">can</span><span class="p">(</span><span class="s2">"register"</span><span class="p">),</span> <span class="kd">function</span><span class="p">(</span><span class="nx">req</span><span class="p">,</span><span class="nx">res</span><span class="p">){</span>
+  <span class="c1">//Only called if the user can register.</span>
+<span class="p">});</span>
+</pre></div>
+
+<h2>Failure handler</h2>
+
+<p>You can (and should) set the failure handler.  This is called whenever a user fails authorization in route middleware.</p>
+
+<p>It is set as follows:</p>
+
+<div class="highlight"><pre><span class="nx">user</span><span class="p">.</span><span class="nx">setFailureHandler</span><span class="p">(</span><span class="kd">function</span> <span class="p">(</span><span class="nx">req</span><span class="p">,</span> <span class="nx">res</span><span class="p">,</span> <span class="nx">action</span><span class="p">){</span>
+  <span class="nx">res</span><span class="p">.</span><span class="nx">send</span><span class="p">(</span><span class="mi">403</span><span class="p">);</span>
+<span class="p">});</span>
+</pre></div>
+
+<p>That, incidentally is the default implimentation.  There is no "next" by design, to stop you accidentally calling it and allowing someone into a restricted part of your site.  You are passed the action/role/ability which caused them to be denied access.</p>
+
+<h3>Redirect on failure</h3>
+
+<p>You should probably consider using this to redirect the user, something like:</p>
+
+<div class="highlight"><pre><span class="nx">user</span><span class="p">.</span><span class="nx">setFailureHandler</span><span class="p">(</span><span class="kd">function</span> <span class="p">(</span><span class="nx">req</span><span class="p">,</span> <span class="nx">res</span><span class="p">,</span> <span class="nx">action</span><span class="p">){</span>
+  <span class="k">if</span><span class="p">(</span><span class="nx">req</span><span class="p">.</span><span class="nx">user</span><span class="p">){</span>
+    <span class="nx">res</span><span class="p">.</span><span class="nx">redirect</span><span class="p">(</span><span class="s1">'/accessdenied?reason='</span> <span class="o">+</span> <span class="nx">action</span><span class="p">);</span>
+  <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+    <span class="nx">res</span><span class="p">.</span><span class="nx">redirect</span><span class="p">(</span><span class="s1">'/login'</span><span class="p">);</span>
+  <span class="p">}</span>
+<span class="p">});</span>
+</pre></div>
+
+<h2>Default User</h2>
+
+<p>By default, the user middleware will set the user up to be <code>{}</code> and will then add the property <code>isAuthenticated = false</code>.</p>
+
+<p>Roles will always add <code>isAuthenticated = false</code> but you can configure a default user object as follows.</p>
+
+<div class="highlight"><pre><span class="nx">user</span><span class="p">.</span><span class="nx">setDefaultUser</span><span class="p">({</span><span class="nx">id</span><span class="o">:</span><span class="s2">"anonymous"</span><span class="p">});</span>
+</pre></div>
+        </article>
+      </div>
+    </div>
+    <footer>
+      <div class="owner">
+      <p><a href="https://github.com/ForbesLindesay" class="avatar"><img src="https://secure.gravatar.com/avatar/eb3e104452d654350a5d1a65caa2e49e?s=30&amp;d=https://a248.e.akamai.net/assets.github.com%2Fimages%2Fgravatars%2Fgravatar-140.png" width="48" height="48"/></a> <a href="https://github.com/ForbesLindesay">ForbesLindesay</a> maintains <a href="https://github.com/ForbesLindesay/connect-roles">Connect-roles</a></p>
+
+
+      </div>
+      <div class="creds">
+        <small>This page generated using <a href="https://pages.github.com/">GitHub Pages</a><br/>theme by <a href="http://twitter.com/jonrohan/">Jon Rohan</a></small>
+      </div>
+    </footer>
+  </div>
+  <div class="current-section">
+    <a href="#top">Scroll to top</a>
+    <a href="https://github.com/ForbesLindesay/connect-roles/tarball/master" class="tar">tar</a><a href="https://github.com/ForbesLindesay/connect-roles/zipball/master" class="zip">zip</a><a href="" class="code">source code</a>
+    <p class="name"></p>
+  </div>
+
+            <script type="text/javascript">
+            var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+            document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+          </script>
+          <script type="text/javascript">
+            try {
+              var pageTracker = _gat._getTracker("UA-34130504-1");
+            pageTracker._trackPageview();
+            } catch(err) {}
+          </script>
+
+</body>
+</html>
