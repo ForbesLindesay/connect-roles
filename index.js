@@ -1,11 +1,11 @@
 "use strict";
 
 var functionList = [];
-var failureHandler = function (req, res, action){
+var failureHandler = function failureHandler(req, res, action) {
     res.send(403);
 };
 var defaultUser = {};
-module.exports = function middleware(req, res, next){
+module.exports = function middleware(req, res, next) {
     var oldUser = req.user;
     req.user = req.user || Object.create(defaultUser);
     if(oldUser){
@@ -25,15 +25,16 @@ module.exports.log = false;
 
 module.exports.can = routeTester('can');
 module.exports.is = routeTester('is');
-module.exports.isAuthenticated = function(req,res,next){
-    if(arguments.length === 0){ return module.exports.isAuthenticated; }
-    if (req.user && req.user.isAuthenticated){ next(); }
+module.exports.isAuthenticated = isAuthenticated;
+function isAuthenticated(req,res,next) {
+    if(arguments.length === 0){ return isAuthenticated; }
+    if (req.user && req.user.isAuthenticated === true){ next(); }
     else if(req.user){ failureHandler(req, res, "isAuthenticated"); }
     else { throw "Request.user was null or undefined, include middleware"; }
 };
 
-module.exports.useAuthorisationStrategy = 
-module.exports.useAuthorizationStrategy = function(path, fn){
+module.exports.useAuthorisationStrategy = useAuthorizationStrategy;
+function useAuthorizationStrategy(path, fn) {
     if(typeof path === "function"){
         fn = path;
     }
@@ -45,10 +46,12 @@ module.exports.useAuthorizationStrategy = function(path, fn){
     });
     return this;
 };
-module.exports.setFailureHandler = function(fn){
+module.exports.setFailureHandler = setFailureHandler;
+function setFailureHandler(fn) {
     failureHandler = fn;
 };
-module.exports.setDefaultUser = function(user){
+module.exports.setDefaultUser = setDefaultUser;
+function setDefaultUser(user) {
     defaultUser = user;
 };
 

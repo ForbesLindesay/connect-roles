@@ -1,4 +1,4 @@
-
+[![Build Status](https://secure.travis-ci.org/ForbesLindesay/connect-roles.png?branch=master)](http://travis-ci.org/ForbesLindesay/connect-roles)
 # Connect Roles
 
 Connect roles is designed to work with connect or express.  It is an authorization provider, not an authentication provider.  It is designed to support context sensitive roles/abilities, through the use of middleware style authentication strategies.
