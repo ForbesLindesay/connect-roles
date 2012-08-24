@@ -1,7 +1,7 @@
 {
   "name": "connect-roles",
   "description": "Provides dynamic roles based authentication for node.js connect and express servers.",
-  "version": "0.1.7",
+  "version": "1.0.0",
   "homepage": "http://documentup.com/ForbesLindesay/connect-roles",
   "repository": {
     "type":"git",
@@ -16,7 +16,7 @@
     "prepublish": "mocha",
     "test": "mocha -R spec"
   },
-  "author": "ForbesLindesay",
+  "author": "Forbes Lindesay",
   "license": "BSD",
   "keywords": [
     "roles",

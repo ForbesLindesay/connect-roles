@@ -6,20 +6,25 @@ var failureHandler = function failureHandler(req, res, action) {
 };
 var defaultUser = {};
 module.exports = function middleware(req, res, next) {
-    var oldUser = req.user;
-    req.user = req.user || Object.create(defaultUser);
-    if(oldUser){
-        req.user.isAuthenticated = true;
-    }else{
-        req.user.isAuthenticated = false;
-    }
-    if(req.user){
-        req.user.is = tester(req,'is');
-        req.user.can = tester(req,'can');
-    }
+    if (res.locals) attachHelpers(req, res.locals);
+    attachHelpers(req, req);
     next();
 };
 
+
+function attachHelpers(req, obj) {
+    var oldUser = req.user;
+    obj.user = req.user || Object.create(defaultUser);
+    if(oldUser){
+        obj.user.isAuthenticated = true;
+    }else{
+        obj.user.isAuthenticated = false;
+    }
+    if(obj.user){
+        obj.user.is = tester(req,'is');
+        obj.user.can = tester(req,'can');
+    }
+}
 
 module.exports.log = false;
 

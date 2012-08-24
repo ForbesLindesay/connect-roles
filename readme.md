@@ -73,7 +73,7 @@ If you have a user object which looks like `{id:10, roles:["RoleA", "RoleB"]}` y
 ```javascript
 user.useAuthorisationStrategy(function(user, action){
 	if(user.isAuthenticated){//You can remove this if already checking for anonymous users
-		for(var i = 0; i<user.roles.length; i++){
+		for(var i = 0; i < user.roles.length; i++){
 			if(user.roles[i] === action) return true;
 		}
 	}
@@ -109,7 +109,7 @@ Providing you have supplied the middleware (see the first section of this guide)
 
 This is a property that is either true or false to tell you whether the user object is present.
 
-### req.userIs, req.userCan, req.user.can, req.user.is
+### req.user.can, req.user.is
 
 These functions are all the same, but be aware that methods of the form req.user.* will throw exceptions if user is null.
 
@@ -128,6 +128,9 @@ app.get("/logout", function(req,res){
 	}
 });
 ```
+### Inside  view
+
+Inside a view, you can use `user.isAuthenticated`, `user.is` and `user.can` exactly as you would inside the route handler (Except they aren't attached to the request handler).  This is useful for making small UI adjustments, but probably shouldn't be used as the main part of security, I recommend you do that before sending stuff to the view.  Just use this to hide buttons that would cause authorization errors.
 
 ## Route middleware for express
 

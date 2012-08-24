@@ -14,6 +14,20 @@ describe('middleware', function () {
                 done();
             });
         });
+        it('adds locals', function (done) {
+            var req = {user: { id: 'Forbes' }};
+            var res = {locals: {}};
+            roles(req, res, function (err) {
+                if (err) return done(err);
+                req.user.isAuthenticated.should.equal(true);
+                req.user.can.should.be.a('function');
+                req.user.is.should.be.a('function');
+                res.locals.user.isAuthenticated.should.equal(true);
+                res.locals.user.can.should.be.a('function');
+                res.locals.user.is.should.be.a('function');
+                done();
+            });
+        });
     });
     describe('when there is no user', function () {
         it('adds methods and the anonymous user', function (done) {
@@ -24,6 +38,20 @@ describe('middleware', function () {
                 req.user.isAuthenticated.should.equal(false);
                 req.user.can.should.be.a('function');
                 req.user.is.should.be.a('function');
+                done();
+            });
+        });
+        it('adds locals for the anonymous user', function (done) {
+            var req = {};
+            var res = {locals: {}};
+            roles(req, res, function (err) {
+                if (err) return done(err);
+                req.user.isAuthenticated.should.equal(false);
+                req.user.can.should.be.a('function');
+                req.user.is.should.be.a('function');
+                res.locals.user.isAuthenticated.should.equal(false);
+                res.locals.user.can.should.be.a('function');
+                res.locals.user.is.should.be.a('function');
                 done();
             });
         });
