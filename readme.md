@@ -87,8 +87,8 @@ This example is what makes this library special.
 ```javascript
 user.useAuthorisationStrategy("edit user", function(user, action){
 	if(user.isAuthenticated){//You can remove this if already checking for anonymous users
-		if(req.params.userid){
-			if(user.id === req.params.userid){
+		if(this.params.userid){//`this` refers to the current request object
+			if(user.id === this.params.userid){
 				return true;
 			}
 		}
@@ -151,8 +151,8 @@ app.get("/admin*", user.is("admin"));
 ```javascript
 user.useAuthorisationStrategy("edit user", function(user, action){
 	if(user.isAuthenticated){//You can remove this if already checking for anonymous users
-		if(req.params.userid){
-			if(user.id === req.params.userid){
+		if(this.params.userid){
+			if(user.id === this.params.userid){
 				return true;
 			}
 		}
