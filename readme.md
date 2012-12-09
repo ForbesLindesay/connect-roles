@@ -1,7 +1,7 @@
 [![Build Status](https://secure.travis-ci.org/ForbesLindesay/connect-roles.png?branch=master)](http://travis-ci.org/ForbesLindesay/connect-roles)
 # Connect Roles
 
-Connect roles is designed to work with connect or express.  It is an authorization provider, not an authentication provider.  It is designed to support context sensitive roles/abilities, through the use of middleware style authentication strategies.
+Connect roles is designed to work with connect or express.  It is an authorization provider, not an authentication provider.  It is designed to support context sensitive roles/abilities, through the use of middleware style authorization strategies.  If you're looking for an authentication system I suggest you check out [passport.js](https://github.com/jaredhanson/passport)
 
 All code samples assume you have already used:
 
