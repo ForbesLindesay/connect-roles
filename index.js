@@ -35,7 +35,7 @@ function isAuthenticated(req,res,next) {
     if(arguments.length === 0){ return isAuthenticated; }
     if (req.user && req.user.isAuthenticated === true){ next(); }
     else if(req.user){ failureHandler(req, res, "isAuthenticated"); }
-    else { throw "Request.user was null or undefined, include middleware"; }
+    else { throw new Error("Request.user was null or undefined, include middleware"); }
 };
 
 module.exports.useAuthorisationStrategy = useAuthorizationStrategy;
