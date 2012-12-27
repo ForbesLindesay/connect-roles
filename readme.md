@@ -1,7 +1,7 @@
 [![Build Status](https://secure.travis-ci.org/ForbesLindesay/connect-roles.png?branch=master)](http://travis-ci.org/ForbesLindesay/connect-roles)
 # Connect Roles
 
-Connect roles is designed to work with connect or express.  It is an authorization provider, not an authentication provider.  It is designed to support context sensitive roles/abilities, through the use of middleware style authentication strategies.
+Connect roles is designed to work with connect or express.  It is an authorization provider, not an authentication provider.  It is designed to support context sensitive roles/abilities, through the use of middleware style authorization strategies.  If you're looking for an authentication system I suggest you check out [passport.js](https://github.com/jaredhanson/passport)
 
 All code samples assume you have already used:
 
@@ -87,8 +87,8 @@ This example is what makes this library special.
 ```javascript
 user.useAuthorisationStrategy("edit user", function(user, action){
 	if(user.isAuthenticated){//You can remove this if already checking for anonymous users
-		if(req.params.userid){
-			if(user.id === req.params.userid){
+		if(this.params.userid){//`this` refers to the current request object
+			if(user.id === this.params.userid){
 				return true;
 			}
 		}
@@ -151,8 +151,8 @@ app.get("/admin*", user.is("admin"));
 ```javascript
 user.useAuthorisationStrategy("edit user", function(user, action){
 	if(user.isAuthenticated){//You can remove this if already checking for anonymous users
-		if(req.params.userid){
-			if(user.id === req.params.userid){
+		if(this.params.userid){
+			if(user.id === this.params.userid){
 				return true;
 			}
 		}
