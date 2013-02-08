@@ -48,7 +48,7 @@ function use3(action, path, fn) {
   var exp = pathToRegexp(path);
   use2(action, function (req) {
     var match;
-    if (match = exp.exec(req.path)) {
+    if (match = exp.exec(req.app.path() + req.path)) {
       req = Object.create(req);
       req.params = Object.create(req.params || {});
       keys.forEach(function (key, i) {
