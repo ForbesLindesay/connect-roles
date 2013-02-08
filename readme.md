@@ -1,222 +1,216 @@
 [![Build Status](https://secure.travis-ci.org/ForbesLindesay/connect-roles.png?branch=master)](http://travis-ci.org/ForbesLindesay/connect-roles)
 # Connect Roles
 
-Connect roles is designed to work with connect or express.  It is an authorization provider, not an authentication provider.  It is designed to support context sensitive roles/abilities, through the use of middleware style authorization strategies.  If you're looking for an authentication system I suggest you check out [passport.js](https://github.com/jaredhanson/passport)
+  Connect roles is designed to work with connect or express.  It is an authorisation provider, not an authentication provider.  It is designed to support context sensitive roles/abilities, through the use of middleware style authorisation strategies.
 
-All code samples assume you have already used:
-
-```javascript
-var app = require('express').createServer();//could also use connect
-var user = require('connect-roles');
-
-app.use(/* Your authentication middleware goes here */);
-app.use(user);//Load the connect-roles middleware here
-```
-
-For an example of this in use, see server.js (which requires you install express)
+  If you're looking for an authentication system I suggest you check out [passport.js](https://github.com/jaredhanson/passport)
 
 ## Installation
 
-    npm install connect-roles
+    $ npm install connect-roles
 
-## Authorization
+## Usage
 
-Connect Roles assumes that you have authentication middleware to set the user.  It expects the user to be on the request object as `req.user`.  It makes no assumptions about what this value contains.  If this value is not used, it does not matter as the authentication strategies also have access to the request object itself
-
-## Defining authentication strategies
-
-To define authentication strategies, call the useAuthorisationStrategy function:
-
-@param [path] {string}   The action/path/ability/role that this strategy applies to.  The strategy will be ignored for all other roles/abilities.  If it is not present, the strategy is used for all roles/abilities.  
-@param fn     {function} The function to call to determine whether the user is authorized.  
-@param fn.this           {object}   The value of this inside the function is the current request, useful for dynamic authorization.  
-@param fn.user           {object}   The user found at req.user (also available as this.user), note that this could be null/undefined if the user is not authenticated.  
-@param fn.action         {string}   The action/role/ability etc. that we are checking permission for.  
-@param fn.stop           {function} A function which can be called with or without the vote to make this the last strategy which is used (see anonymous example).  
-@param [fn.stop.vote]         {boolean} The vote, true, false or null as below.  
-@param [fn.returns vote] {boolean}  The function can optionally return a vote, if this is false, then access will be denied, if this is true and nothing returns false, access will be granted.  
- 
 ```javascript
-user.useAuthorisationStrategy(function(user, action, stop){
-	//User logic here.
+var authentication = require('your-authentication-module-here');
+var user = require('connect-roles');
+var express = require('express');
+var app = express();
+
+app.use(authentication)
+app.use(user);
+
+//anonymous users can only access the home page
+//returning false stops any more rules from being
+//considered
+app.use(function (req, action) {
+  if (!req.user.isAuthenticated) return action === 'access home page';
+})
+
+//moderator users can access private page, but
+//they might not be the only one so we don't return
+//false if the user isn't a moderator
+app.use('access private page', function (req) {
+  if (req.user.role ==== 'moderator') {
+    return true;
+  }
+})
+
+//admin users can access all pages
+user.use(function (req) {
+  if (req.user.role === 'admin') {
+    return true;
+  }
 });
 
-//Or
+//optionally controll the access denid page displayed
+user.setFailureHandler(function (req, res, action){
+  var accept = req.headers.accept || '';
+  res.status(403);
+  if (~accept.indexOf('html')) {
+    res.render('access-denied', {action: action});
+  } else {
+    res.send('Access Denied - You don\'t have permission to: ' + action);
+  }
+});
 
-user.useAuthorisationStrategy("create user", function(user, action, stop){
-	//User logic here.
+
+app.get('/', user.can('access home page'), function (req, res) {
+  res.render('private');
+});
+app.get('/private', user.can('access private page'), function (req, res) {
+  res.render('private');
+});
+app.get('/admin', user.can('access admin page'), function (req, res) {
+  res.render('admin');
+});
+
+app.listen(3000);
+```
+
+## API
+
+### roles.use(fn(req, action))
+
+  Define and authorisation strategy which takes the current request and the action being performed.  fn may return `true`, `false` or `undefined`/`null`
+
+  If `true` is returned then no further strategies are considred, and the user is **granted** access.
+
+  If `false` is returned, no further strategies are considered, and the user is **denied** access.
+
+  If `null`/`undefined` is returned, the next strategy is considerd.  If it is the last strategy then access is **denied**.
+
+### roles.use(action, fn(req))
+
+  The strategy `fn` is only used when the action is equal to `action`.  It has the same behaviour with regards to return values as `roles.use(fn(req, action))` (see above).
+
+  It is equivallent to calling:
+
+  ```javascript
+  roles.use(function (req, act) {
+    if (act === action) {
+      return fn(req);
+    }
+  });
+  ```
+
+  **N.B.** The action must not start with a `/` character or it will call `roles.use(path, fn(req, action))`
+
+### roles.use(action, path, fn(req))
+
+  Path must be an express style route.  It will then attach any parameters to `req.params`.
+
+  e.g.
+
+```javascript
+roles.use('edit user', '/user/:userID', function (req) {
+  if (req.params.userID === req.user.id) return true;
 });
 ```
 
-### Anonymous User
+  Note that this authorisation strategy will only be used on routes that match `path`.
 
-You should probably handle anonymous users first.  This is important because it means you then won't have to handle anonymous users individually in every other function, providing you call stop.
-
-If you have anything that an anonymous user is capeable of, you must then check before checking for "anonymous".
+  It is equivallent to calling:
 
 ```javascript
-user.useAuthorisationStrategy("register", function(user){
-	if(!user.isAuthenticated) return true;
-});
-
-user.useAuthorisationStrategy(function(user, action, stop){
-	if(!user.isAuthenticated){
-		stop(action === "anonymous");
-	}
+var keys = [];
+var exp = pathToRegexp(path);
+roles.use(function (req, act) {
+  var match;
+  if (act === action && match = exp.exec(req.path)) {
+    req = Object.create(req);
+    req.params = Object.create(req.params || {});
+    keys.forEach(function (key, i) {
+      req.params[key.name] = match[i+1];
+    });
+    return fn(req);
+  }
 });
 ```
 
-### Roles
+### roles.can(action) and roles.is(action)
 
-If you have a user object which looks like `{id:10, roles:["RoleA", "RoleB"]}` you could use the following to provide roles checking.
+  `can` and `is` are synonyms everywhere they appear.
 
-```javascript
-user.useAuthorisationStrategy(function(user, action){
-	if(user.isAuthenticated){//You can remove this if already checking for anonymous users
-		for(var i = 0; i < user.roles.length; i++){
-			if(user.roles[i] === action) return true;
-		}
-	}
-});
-```
-
-### Dynamic
-
-This example is what makes this library special.
+  You can use these as express route middleware:
 
 ```javascript
-user.useAuthorisationStrategy("edit user", function(user, action){
-	if(user.isAuthenticated){//You can remove this if already checking for anonymous users
-		if(this.params.userid){//`this` refers to the current request object
-			if(user.id === this.params.userid){
-				return true;
-			}
-		}
-	}
-});
+var user = roles;
 
-//Then you can use the following in express
-app.get('/user/:userid/edit', user.can("edit user"), function(req,res){
-	//Only called if the user is editing themselves, not other people.
-});
+app.get('/profile/:id', user.can('edit profile'), function (req, res) {
+  req.render('profile-edit', { id: req.params.id });
+})
+app.get('/admin', user.is('admin'), function (req, res) {
+  res.render('admin');
+}
 ```
 
-## Inline authorization for connect or express
+### req.user.can(action) and req.user.is(action)
 
-Providing you have supplied the middleware (see the first section of this guide) you can use the following functions.
+  `can` and `is` are synonyms everywhere they appear.
 
-### req.isAuthenticated
+  These functions return `true` or `false` depending on whether the user has access.
 
-This is a property that is either true or false to tell you whether the user object is present.
-
-### req.user.can, req.user.is
-
-These functions are all the same, but be aware that methods of the form req.user.* will throw exceptions if user is null.
+  e.g.
 
 ```javascript
-app.get("/canifly", function(req,res){
-	if(req.userCan("fly")) res.send("You can fly");
-	else res.send("You can't fly");
-});
-
-app.get("/logout", function(req,res){
-    //Note how we check authenticated first.
-	if(req.isAuthenticated && req.user.can("logout")){
-		logout();
-	}else{
-		throw "user can't log out";
-	}
-});
-```
-### Inside  view
-
-Inside a view, you can use `user.isAuthenticated`, `user.is` and `user.can` exactly as you would inside the route handler (Except they aren't attached to the request handler).  This is useful for making small UI adjustments, but probably shouldn't be used as the main part of security, I recommend you do that before sending stuff to the view.  Just use this to hide buttons that would cause authorization errors.
-
-## Route middleware for express
-
-In express you can provide route middleware.  This is perfect for authentication, especially with wildcards.
-
-
-### Protect entire admin section in one line
-
-Simply put this before you have any other routes beginning /admin
-
-```javascript
-app.get("/admin*", user.is("admin"));
-
+app.get('/', function (req, res) {
+  if (req.user.is('admin')) {
+    res.render('home/admin');
+  } else if (user.can('login')) {
+    res.render('home/login');
+  } else {
+    res.render('home');
+  }
+})
 ```
 
-### Only let people edit themselves
+### user.can(action) and user.is(action)
 
-```javascript
-user.useAuthorisationStrategy("edit user", function(user, action){
-	if(user.isAuthenticated){//You can remove this if already checking for anonymous users
-		if(this.params.userid){
-			if(user.id === this.params.userid){
-				return true;
-			}
-		}
-	}
-});
+  Inside the views of an express application you may use `user.can` and `user.is` which are equivallent to `req.user.can` and `req.user.is`
 
-//Then you can use the following in express
-app.get('/user/:userid/edit', user.can("edit user"), function(req,res){
-	//Only called if the user is editing themselves, not other people.
-});
+  e.g.
+
+```html
+<% if (user.can('impersonate')) { %>
+  <button id="impersonate">Impersonate</button>
+<% } %>
 ```
 
-### Chain things
+  **N.B.** not displaying a button doesn't mean someone can't do the thing that the button would do if clicked.  The view is not where your security should go, but it is important for useability that you don't display buttons that will just result in 'access denied' where possible.
 
-```javascript
-user.useAuthorisationStrategy("register", function(user){
-	if(!user.isAuthenticated) return true;
-});
+### roles.setFailureHandler(fn(req, res, action))
 
-user.useAuthorisationStrategy(function(user, action, stop){
-	if(!user.isAuthenticated){
-		stop(action === "anonymous");
-	}
-});
+  You can (and should) set the failure handler.  This is called whenever a user fails authorisation in route middleware.
 
-app.get("/register", user.is("anonymous"), user.can("register"), function(req,res){
-	//Only called if the user can register.
-});
-```
-
-## Failure handler
-
-You can (and should) set the failure handler.  This is called whenever a user fails authorization in route middleware.
-
-It is set as follows:
+  Defaults to:
 
 ```javascript
 user.setFailureHandler(function (req, res, action){
-	res.send(403);
+  res.send(403);
 });
 ```
 
-That, incidentally is the default implimentation.  There is no "next" by design, to stop you accidentally calling it and allowing someone into a restricted part of your site.  You are passed the action/role/ability which caused them to be denied access.
+  There is no "next" by design, to stop you accidentally calling it and allowing someone into a restricted part of your site.  You are passed the action requested which caused them to be denied access.
 
-### Redirect on failure
-
-You should probably consider using this to redirect the user, something like:
+  You could using this to redirect the user or render an error page:
 
 ```javascript
 user.setFailureHandler(function (req, res, action){
-	if(req.user){
-		res.redirect('/accessdenied?reason=' + action);
-	} else {
-		res.redirect('/login');
-	}
+  var accept = req.headers.accept || '';
+  res.status(403);
+  if(req.user.isAuthenticated){
+    if (~accept.indexOf('html')) {
+      res.render('access-denied', {action: action});
+    } else {
+      res.send('Access Denied - You don\'t have permission to: ' + action);
+    }
+  } else {
+    res.redirect('/login');
+  }
 });
 ```
 
-## Default User
+## License
 
-By default, the user middleware will set the user up to be `{}` and will then add the property `isAuthenticated = false`.
-
-Roles will always add `isAuthenticated = false` but you can configure a default user object as follows.
-
-```javascript
-user.setDefaultUser({id:"anonymous"});
-```
+  MIT

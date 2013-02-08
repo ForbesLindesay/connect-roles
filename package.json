@@ -27,5 +27,9 @@
     "express",
     "passport",
     "everyauth"
-  ]
+  ],
+  "dependencies": {
+    "debug": "~0.7.2",
+    "path-to-regexp": "0.0.1"
+  }
 }
