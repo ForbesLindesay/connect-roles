@@ -45,7 +45,7 @@ function use2(action, fn) {
 function use3(action, path, fn) {
   if (typeof path !== 'string') throw new Error('Expected path to be of type string');
   var keys = [];
-  var exp = pathToRegexp(path);
+  var exp = pathToRegexp(path, keys);
   use2(action, function (req) {
     var match;
     if (match = exp.exec(req.app.path() + req.path)) {
