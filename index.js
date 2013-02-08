@@ -18,7 +18,7 @@ var exports = module.exports = function middleware(req, res, next) {
 
 exports.use = use;
 function use() {
-  if (argument.length === 1) {
+  if (arguments.length === 1) {
     use1.apply(this, arguments);
   } else if (arguments.length === 2) {
     use2.apply(this, arguments);
