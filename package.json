@@ -29,7 +29,7 @@
     "everyauth"
   ],
   "dependencies": {
-    "debug": "~0.7.2",
-    "path-to-regexp": "0.0.1"
+    "debug": "https://github.com/ForbesLindesay/debug/archive/master.tar.gz",
+    "path-to-regexp": "https://github.com/ForbesLindesay/path-to-regexp/archive/master.tar.gz"
   }
 }

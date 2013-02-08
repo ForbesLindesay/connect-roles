@@ -59,24 +59,9 @@ function use3(action, path, fn) {
   });
 }
 
-
-function attachHelpers(req, obj) {
-  var oldUser = req.user;
-  obj.user = req.user || Object.create(defaultUser);
-  if(oldUser){
-    obj.user.isAuthenticated = true;
-  }else{
-    obj.user.isAuthenticated = false;
-  }
-  if(obj.user){
-    obj.user.is = tester(req,'is');
-    obj.user.can = tester(req,'can');
-  }
-}
-
-module.exports.can = routeTester('can');
-module.exports.is = routeTester('is');
-module.exports.isAuthenticated = isAuthenticated;
+exports.can = routeTester('can');
+exports.is = routeTester('is');
+exports.isAuthenticated = isAuthenticated;
 function isAuthenticated(req,res,next) {
   if(arguments.length === 0){ return isAuthenticated; }
   if (req.user && req.user.isAuthenticated === true){ next(); }
@@ -84,24 +69,12 @@ function isAuthenticated(req,res,next) {
   else { throw new Error("Request.user was null or undefined, include middleware"); }
 };
 
-module.exports.useAuthorisationStrategy = useAuthorizationStrategy;
-function useAuthorizationStrategy(path, fn) {
-  if(typeof path === "function"){
-    fn = path;
-  }
-  functionList.push(function(user, action, stop){
-      if(typeof path === "string" && path !== action){
-        return null;
-      }
-      return fn.call(this, user, action, stop);
-  });
-  return this;
-};
-module.exports.setFailureHandler = setFailureHandler;
+exports.setFailureHandler = setFailureHandler;
 function setFailureHandler(fn) {
   failureHandler = fn;
 };
-module.exports.setDefaultUser = setDefaultUser;
+
+exports.setDefaultUser = setDefaultUser;
 function setDefaultUser(user) {
   defaultUser = user;
 };
@@ -126,9 +99,10 @@ function tester(req, verb){
     return (result === true);
   };
 }
-function routeTester(verb){
+
+function routeTester(verb) {
   return function (action){  
-    return function(req,res,next){
+    return function (req, res, next) {
       if(tester(req,verb)(action)){
         next();
       }else{
@@ -137,4 +111,18 @@ function routeTester(verb){
       }
     };
   };
+}
+
+function attachHelpers(req, obj) {
+  var oldUser = req.user;
+  obj.user = req.user || Object.create(defaultUser);
+  if(oldUser){
+    obj.user.isAuthenticated = true;
+  }else{
+    obj.user.isAuthenticated = false;
+  }
+  if(obj.user){
+    obj.user.is = tester(req,'is');
+    obj.user.can = tester(req,'can');
+  }
 }
