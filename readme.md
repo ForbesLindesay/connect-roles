@@ -1,3 +1,4 @@
+<img src="http://i.imgur.com/opZKqAi.png" align="right"/>
 [![Build Status](https://secure.travis-ci.org/ForbesLindesay/connect-roles.png?branch=master)](http://travis-ci.org/ForbesLindesay/connect-roles)
 # Connect Roles
 
