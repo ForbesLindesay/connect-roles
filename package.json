@@ -13,7 +13,6 @@
     "mocha": "*"
   },
   "scripts": {
-    "prepublish": "mocha",
     "test": "mocha -R spec"
   },
   "author": "Forbes Lindesay",
