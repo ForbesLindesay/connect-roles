@@ -216,3 +216,5 @@ user.setFailureHandler(function (req, res, action){
 ## License
 
   MIT
+
+![viewcount](https://viewcount.jepso.com/count/ForbesLindesay/connect-roles.png)
