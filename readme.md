@@ -216,5 +216,7 @@ user.setFailureHandler(function (req, res, action){
 ## License
 
   MIT
+  
+  If you find it useful, a payment via [gittip](https://www.gittip.com/ForbesLindesay) would be appreciated.
 
 ![viewcount](https://viewcount.jepso.com/count/ForbesLindesay/connect-roles.png)
