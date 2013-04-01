@@ -113,6 +113,7 @@ function routeTester(verb) {
   };
 }
 
+exports.attachHelpers = attachHelpers;
 function attachHelpers(req, obj) {
   var oldUser = req.user;
   obj.user = req.user || Object.create(defaultUser);
