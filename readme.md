@@ -25,14 +25,14 @@ app.use(user);
 //anonymous users can only access the home page
 //returning false stops any more rules from being
 //considered
-app.use(function (req, action) {
+user.use(function (req, action) {
   if (!req.user.isAuthenticated) return action === 'access home page';
 })
 
 //moderator users can access private page, but
 //they might not be the only one so we don't return
 //false if the user isn't a moderator
-app.use('access private page', function (req) {
+user.use('access private page', function (req) {
   if (req.user.role ==== 'moderator') {
     return true;
   }
