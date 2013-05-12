@@ -103,6 +103,7 @@ function tester(req, verb){
 function routeTester(verb) {
   return function (action){  
     return function (req, res, next) {
+      if(typeof(action) === "object") action = action.values[req.params[action.param]];
       if(tester(req,verb)(action)){
         next();
       }else{
