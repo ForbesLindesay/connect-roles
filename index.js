@@ -1,6 +1,7 @@
 "use strict";
 
 var debug = require('debug')('connect-roles');
+var ert = require('ert');
 var pathToRegexp = require('path-to-regexp');
 
 var functionList = [];
@@ -103,11 +104,12 @@ function tester(req, verb){
 function routeTester(verb) {
   return function (action){  
     return function (req, res, next) {
-      if(tester(req,verb)(action)){
+      var act = ert(req, action);
+      if(tester(req,verb)(act)){
         next();
       }else{
         //Failed authentication.
-        failureHandler(req, res, action);  
+        failureHandler(req, res, act);  
       }
     };
   };
