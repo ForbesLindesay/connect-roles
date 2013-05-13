@@ -1,6 +1,7 @@
 "use strict";
 
 var debug = require('debug')('connect-roles');
+var ert = require('ert');
 var pathToRegexp = require('path-to-regexp');
 
 var functionList = [];
@@ -103,7 +104,7 @@ function tester(req, verb){
 function routeTester(verb) {
   return function (action){  
     return function (req, res, next) {
-      if(typeof(action) === "object") action = action.values[req.params[action.param]];
+      action = ert(req, action);
       if(tester(req,verb)(action)){
         next();
       }else{
