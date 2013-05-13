@@ -104,12 +104,12 @@ function tester(req, verb){
 function routeTester(verb) {
   return function (action){  
     return function (req, res, next) {
-      action = ert(req, action);
-      if(tester(req,verb)(action)){
+      var act = ert(req, action);
+      if(tester(req,verb)(act)){
         next();
       }else{
         //Failed authentication.
-        failureHandler(req, res, action);  
+        failureHandler(req, res, act);  
       }
     };
   };
