@@ -29,6 +29,7 @@
   ],
   "dependencies": {
     "debug": "https://github.com/ForbesLindesay/debug/archive/master.tar.gz",
-    "path-to-regexp": "https://github.com/ForbesLindesay/path-to-regexp/archive/master.tar.gz"
+    "path-to-regexp": "https://github.com/ForbesLindesay/path-to-regexp/archive/master.tar.gz",
+    "ert": "git://github.com/phyrog/ert.git"
   }
 }
