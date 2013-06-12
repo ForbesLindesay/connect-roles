@@ -91,6 +91,7 @@ function tester(req, verb){
         stop = true;
         result = false;
       } else if (vote === true){
+        stop = true;
         result = true;
       }
     }
@@ -101,13 +102,13 @@ function tester(req, verb){
 }
 
 function routeTester(verb) {
-  return function (action){  
+  return function (action){
     return function (req, res, next) {
       if(tester(req,verb)(action)){
         next();
       }else{
         //Failed authentication.
-        failureHandler(req, res, action);  
+        failureHandler(req, res, action);
       }
     };
   };
