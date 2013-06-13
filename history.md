@@ -1,3 +1,9 @@
+2.1.0 / 2013-06-13
+==================
+
+  * fix: route handlers would continue falling through even when `true` was returned (thanks to [@doughsay](https://github.com/doughsay) for reporting and helping with the fix)
+  * Use npm versions of dependencies, rather than my own GitHub forks
+
 2.0.3 / 2013-02-10
 ==================
 
