@@ -7,6 +7,7 @@
 
 [![Build Status](https://secure.travis-ci.org/ForbesLindesay/connect-roles.png?branch=master)](http://travis-ci.org/ForbesLindesay/connect-roles)
 [![Dependency Status](https://gemnasium.com/ForbesLindesay/connect-roles.png)](https://gemnasium.com/ForbesLindesay/connect-roles)
+[![NPM version](https://badge.fury.io/js/connect-roles.png)](http://badge.fury.io/js/connect-roles)
 
 ## Installation
 
