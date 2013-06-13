@@ -82,16 +82,12 @@ function setDefaultUser(user) {
 
 function tester(req, verb){
   return function(action){
-    var result = null, vote;
-    var stop = false;
-    for (var i = 0; i<functionList.length && !stop; i++){
+    var result = null;
+    for (var i = 0; i<functionList.length && result === null; i++){
       var fn = functionList[i];
-      vote = fn(req, action);
-      if(vote === false){
-        stop = true;
-        result = false;
-      } else if (vote === true){
-        result = true;
+      var vote = fn(req, action);
+      if (typeof vote === 'boolean') {
+        result = vote
       }
     }
     debug('Check Permission: ' + (req.user.id||req.user.name||"user") +
@@ -101,13 +97,13 @@ function tester(req, verb){
 }
 
 function routeTester(verb) {
-  return function (action){  
+  return function (action){
     return function (req, res, next) {
       if(tester(req,verb)(action)){
         next();
       }else{
         //Failed authentication.
-        failureHandler(req, res, action);  
+        failureHandler(req, res, action);
       }
     };
   };
