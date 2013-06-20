@@ -1,6 +1,6 @@
 {
   "name": "connect-roles",
-  "description": "Provides dynamic roles based authentication for node.js connect and express servers.",
+  "description": "Provides dynamic roles based authorization for node.js connect and express servers.",
   "version": "2.1.0",
   "homepage": "http://documentup.com/ForbesLindesay/connect-roles",
   "repository": {
