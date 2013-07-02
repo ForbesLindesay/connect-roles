@@ -96,7 +96,7 @@ function tester(req, verb){
         result = vote
       }
     }
-    debug('Check Permission: ' + (req[userProperty].id||req.user.name||"user") +
+    debug('Check Permission: ' + (req[userProperty].id||req[userProperty].name||"user") +
         "." + (verb || 'can') + "('" + action + "') -> " + (result === true));
     return (result === true);
   };
