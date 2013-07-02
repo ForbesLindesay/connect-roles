@@ -8,6 +8,7 @@ var failureHandler = function failureHandler(req, res, action) {
   res.send(403);
 };
 var defaultUser = {};
+var userProperty = 'user';
 
 
 var exports = module.exports = function middleware(req, res, next) {
@@ -64,9 +65,9 @@ exports.is = routeTester('is');
 exports.isAuthenticated = isAuthenticated;
 function isAuthenticated(req,res,next) {
   if(arguments.length === 0){ return isAuthenticated; }
-  if (req.user && req.user.isAuthenticated === true){ next(); }
-  else if(req.user){ failureHandler(req, res, "isAuthenticated"); }
-  else { throw new Error("Request.user was null or undefined, include middleware"); }
+  if (req[userProperty] && req[userProperty].isAuthenticated === true){ next(); }
+  else if(req[userProperty]){ failureHandler(req, res, "isAuthenticated"); }
+  else { throw new Error("Request[userProperty] was null or undefined, include middleware"); }
 };
 
 exports.setFailureHandler = setFailureHandler;
@@ -77,6 +78,11 @@ function setFailureHandler(fn) {
 exports.setDefaultUser = setDefaultUser;
 function setDefaultUser(user) {
   defaultUser = user;
+};
+
+exports.setUserProperty = setUserProperty;
+function setUserProperty(userProp) {
+  userProperty = userProp;
 };
 
 
@@ -90,7 +96,7 @@ function tester(req, verb){
         result = vote
       }
     }
-    debug('Check Permission: ' + (req.user.id||req.user.name||"user") +
+    debug('Check Permission: ' + (req[userProperty].id||req.user.name||"user") +
         "." + (verb || 'can') + "('" + action + "') -> " + (result === true));
     return (result === true);
   };
@@ -110,15 +116,15 @@ function routeTester(verb) {
 }
 
 function attachHelpers(req, obj) {
-  var oldUser = req.user;
-  obj.user = req.user || Object.create(defaultUser);
+  var oldUser = req[userProperty];
+  obj[userProperty] = req[userProperty] || Object.create(defaultUser);
   if(oldUser){
-    obj.user.isAuthenticated = true;
+    obj[userProperty].isAuthenticated = true;
   }else{
-    obj.user.isAuthenticated = false;
+    obj[userProperty].isAuthenticated = false;
   }
-  if(obj.user){
-    obj.user.is = tester(req,'is');
-    obj.user.can = tester(req,'can');
+  if(obj[userProperty]){
+    obj[userProperty].is = tester(req,'is');
+    obj[userProperty].can = tester(req,'can');
   }
 }
