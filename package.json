@@ -9,7 +9,6 @@
   },
   "main": "./index",
   "devDependencies": {
-    "should": "*",
     "mocha": "*"
   },
   "scripts": {

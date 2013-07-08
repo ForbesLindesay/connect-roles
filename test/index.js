@@ -1,5 +1,5 @@
+var assert = require('assert');
 var roles = require('../');
-var assert = require('should');
 
 describe('middleware', function () {
     describe('when there is a user', function () {
@@ -8,9 +8,9 @@ describe('middleware', function () {
             var res = {};
             roles(req, res, function (err) {
                 if (err) return done(err);
-                req.user.isAuthenticated.should.equal(true);
-                req.user.can.should.be.a('function');
-                req.user.is.should.be.a('function');
+                assert.strictEqual(req.user.isAuthenticated, true);
+                assert.strictEqual(typeof req.user.can, 'function');
+                assert.strictEqual(typeof req.user.is, 'function');
                 done();
             });
         });
@@ -19,12 +19,12 @@ describe('middleware', function () {
             var res = {locals: {}};
             roles(req, res, function (err) {
                 if (err) return done(err);
-                req.user.isAuthenticated.should.equal(true);
-                req.user.can.should.be.a('function');
-                req.user.is.should.be.a('function');
-                res.locals.user.isAuthenticated.should.equal(true);
-                res.locals.user.can.should.be.a('function');
-                res.locals.user.is.should.be.a('function');
+                assert.strictEqual(req.user.isAuthenticated, true);
+                assert.strictEqual(typeof req.user.can, 'function');
+                assert.strictEqual(typeof req.user.is, 'function');
+                assert.strictEqual(res.locals.user.isAuthenticated, true);
+                assert.strictEqual(typeof res.locals.user.can, 'function');
+                assert.strictEqual(typeof res.locals.user.is, 'function');
                 done();
             });
         });
@@ -35,9 +35,9 @@ describe('middleware', function () {
             var res = {};
             roles(req, res, function (err) {
                 if (err) return done(err);
-                req.user.isAuthenticated.should.equal(false);
-                req.user.can.should.be.a('function');
-                req.user.is.should.be.a('function');
+                assert.strictEqual(req.user.isAuthenticated, false);
+                assert.strictEqual(typeof req.user.can, 'function');
+                assert.strictEqual(typeof req.user.is, 'function');
                 done();
             });
         });
@@ -46,12 +46,12 @@ describe('middleware', function () {
             var res = {locals: {}};
             roles(req, res, function (err) {
                 if (err) return done(err);
-                req.user.isAuthenticated.should.equal(false);
-                req.user.can.should.be.a('function');
-                req.user.is.should.be.a('function');
-                res.locals.user.isAuthenticated.should.equal(false);
-                res.locals.user.can.should.be.a('function');
-                res.locals.user.is.should.be.a('function');
+                assert.strictEqual(req.user.isAuthenticated, false);
+                assert.strictEqual(typeof req.user.can, 'function');
+                assert.strictEqual(typeof req.user.is, 'function');
+                assert.strictEqual(res.locals.user.isAuthenticated, false);
+                assert.strictEqual(typeof res.locals.user.can, 'function');
+                assert.strictEqual(typeof res.locals.user.is, 'function');
                 done();
             });
         });
@@ -87,7 +87,7 @@ describe('isAuthenticated route middleware', function () {
             var req = {user: { id: 'Forbes' }};
             var res = {send: send};
             function send(code) {
-                code.should.equal(403);
+                assert.strictEqual(code, 403);
                 done();
             }
             roles.isAuthenticated(req, res, notCalled('next'));
@@ -99,9 +99,9 @@ describe('isAuthenticated route middleware', function () {
             var res = {};
             roles(req, res, function (err) {
                 if (err) return done(err);
-                req.user.isAuthenticated.should.equal(false);
-                req.user.can.should.be.a('function');
-                req.user.is.should.be.a('function');
+                assert.strictEqual(req.user.isAuthenticated, false);
+                assert.strictEqual(typeof req.user.can, 'function');
+                assert.strictEqual(typeof req.user.is, 'function');
                 done();
             });
         });
