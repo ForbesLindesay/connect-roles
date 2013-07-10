@@ -1,12 +1,13 @@
 var roles = require('../');
 var assert = require('should');
+var middleware = roles.initialize();
 
 describe('middleware', function () {
     describe('when there is a user', function () {
         it('adds methods', function (done) {
             var req = {user: { id: 'Forbes' }};
             var res = {};
-            roles(req, res, function (err) {
+            middleware(req, res, function (err) {
                 if (err) return done(err);
                 req.user.isAuthenticated.should.equal(true);
                 req.user.can.should.be.a('function');
@@ -17,7 +18,7 @@ describe('middleware', function () {
         it('adds locals', function (done) {
             var req = {user: { id: 'Forbes' }};
             var res = {locals: {}};
-            roles(req, res, function (err) {
+            middleware(req, res, function (err) {
                 if (err) return done(err);
                 req.user.isAuthenticated.should.equal(true);
                 req.user.can.should.be.a('function');
@@ -33,7 +34,7 @@ describe('middleware', function () {
         it('adds methods and the anonymous user', function (done) {
             var req = {};
             var res = {};
-            roles(req, res, function (err) {
+            middleware(req, res, function (err) {
                 if (err) return done(err);
                 req.user.isAuthenticated.should.equal(false);
                 req.user.can.should.be.a('function');
@@ -44,7 +45,7 @@ describe('middleware', function () {
         it('adds locals for the anonymous user', function (done) {
             var req = {};
             var res = {locals: {}};
-            roles(req, res, function (err) {
+            middleware(req, res, function (err) {
                 if (err) return done(err);
                 req.user.isAuthenticated.should.equal(false);
                 req.user.can.should.be.a('function');
@@ -66,7 +67,7 @@ function notCalled(name) {
 describe('isAuthenticated route middleware', function () {
     describe('when there is a user', function () {
         before(function () {
-            roles.setFailureHandler(notCalled('Failure Handler'));
+            roles.initialize({failureHandler: notCalled('Failure Handler')});
         });
         it('passes the test', function (done) {
             var req = {user: { isAuthenticated: true }};
@@ -77,9 +78,9 @@ describe('isAuthenticated route middleware', function () {
             });
         });
         after(function () {
-            roles.setFailureHandler(function failureHandler(req, res, action) {
+            roles.initialize({failureHandler: function failureHandler(req, res, action) {
                 res.send(403);
-            });
+            }});
         });
     });
     describe('when there is a user but they aren\'t authenticated.', function () {
@@ -97,7 +98,7 @@ describe('isAuthenticated route middleware', function () {
         it('adds methods and the anonymous user', function (done) {
             var req = {};
             var res = {};
-            roles(req, res, function (err) {
+            middleware(req, res, function (err) {
                 if (err) return done(err);
                 req.user.isAuthenticated.should.equal(false);
                 req.user.can.should.be.a('function');

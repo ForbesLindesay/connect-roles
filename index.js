@@ -11,7 +11,20 @@ var defaultUser = {};
 var userProperty = 'user';
 
 
-var exports = module.exports = function middleware(req, res, next) {
+var exports = module.exports;
+
+exports.initialize = initialize;
+function initialize(options) {
+  if(options) {
+    failureHandler = options.failureHandler || failureHandler;
+    defaultUser = options.defaultUser || defaultUser;
+    userProperty = options.userProperty || userProperty;
+  }
+
+  return middleware;
+};
+
+function middleware(req, res, next) {
   if (res.locals) attachHelpers(req, res.locals);
   attachHelpers(req, req);
   next();
@@ -69,22 +82,6 @@ function isAuthenticated(req,res,next) {
   else if(req[userProperty]){ failureHandler(req, res, "isAuthenticated"); }
   else { throw new Error("Request[userProperty] was null or undefined, include middleware"); }
 };
-
-exports.setFailureHandler = setFailureHandler;
-function setFailureHandler(fn) {
-  failureHandler = fn;
-};
-
-exports.setDefaultUser = setDefaultUser;
-function setDefaultUser(user) {
-  defaultUser = user;
-};
-
-exports.setUserProperty = setUserProperty;
-function setUserProperty(userProp) {
-  userProperty = userProp;
-};
-
 
 function tester(req, verb){
   return function(action){
