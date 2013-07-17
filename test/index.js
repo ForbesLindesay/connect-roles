@@ -114,3 +114,33 @@ describe('isAuthenticated route middleware', function () {
         });
     });
 });
+
+describe('when there are no handlers', function () {
+  it('requests are rejected by default', function (done) {
+    roles.setFailureHandler(function () { done(); });
+    roles.is('any')({}, {}, notCalled('next'));
+  });
+});
+describe('when there are no handlers that return `true` or `false`', function () {
+  it('requests are rejected by default', function (done) {
+    roles.setFailureHandler(function () { done(); });
+    roles.use(function (req, action) { assert(action === 'any'); });
+    roles.is('any')({}, {}, notCalled('next'));
+  });
+});
+describe('when the first handler returns `false`', function () {
+  it('requests are rejected', function (done) {
+    roles.setFailureHandler(function () { done(); });
+    roles.use(function (req, action) { assert(action === 'any'); return false; });
+    roles.use(function (req, action) { assert(action === 'any'); return true; });
+    roles.is('any')({}, {}, notCalled('next'));
+  });
+});
+describe('when one handler returns `true', function () {
+  it('requests are accepted', function (done) {
+    roles.setFailureHandler(notCalled('failureHandler'));
+    roles.use(function (req, action) { assert(action === 'any'); });
+    roles.use(function (req, action) { assert(action === 'any'); return true; });
+    roles.is('any')({}, {}, done);
+  });
+});
