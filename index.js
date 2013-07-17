@@ -5,17 +5,25 @@ var ert = require('ert');
 var pathToRegexp = require('path-to-regexp');
 
 var functionList = [];
-var failureHandler = function failureHandler(req, res, action) {
-  res.send(403);
-};
+var failureHandler = defaultFailureHandler;
 var defaultUser = {};
 
+function defaultFailureHandler(req, res, action) {
+  res.send(403);
+}
 
 var exports = module.exports = function middleware(req, res, next) {
   if (res.locals) attachHelpers(req, res.locals);
   attachHelpers(req, req);
   next();
 };
+
+exports.reset = reset;
+function reset() {
+  functionList = [];
+  failureHandler = defaultFailureHandler;
+  defaultUser = {};
+}
 
 exports.use = use;
 function use() {
