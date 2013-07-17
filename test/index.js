@@ -1,6 +1,13 @@
 var assert = require('assert');
 var roles = require('../');
 
+beforeEach(function () {
+  roles.reset();
+});
+afterEach(function () {
+  roles.reset();
+});
+
 describe('middleware', function () {
     describe('when there is a user', function () {
         it('adds methods', function (done) {
