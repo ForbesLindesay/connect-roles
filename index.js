@@ -109,7 +109,7 @@ function routeTester(verb) {
   return function (action){
     return function (req, res, next) {
       var act = ert(req, action);
-      if(tester(req,verb)(act)){
+      if(req.user && tester(req,verb)(act)){
         next();
       }else{
         //Failed authentication.
