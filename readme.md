@@ -35,7 +35,7 @@ user.use(function (req, action) {
 //they might not be the only one so we don't return
 //false if the user isn't a moderator
 user.use('access private page', function (req) {
-  if (req.user.role ==== 'moderator') {
+  if (req.user.role === 'moderator') {
     return true;
   }
 })
