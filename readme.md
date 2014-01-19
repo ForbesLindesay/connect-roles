@@ -76,7 +76,7 @@ app.listen(3000);
 
 ### roles.use(fn(req, action))
 
-  Define and authorisation strategy which takes the current request and the action being performed.  fn may return `true`, `false` or `undefined`/`null`
+  Define an authorisation strategy which takes the current request and the action being performed.  fn may return `true`, `false` or `undefined`/`null`
 
   If `true` is returned then no further strategies are considred, and the user is **granted** access.
 
