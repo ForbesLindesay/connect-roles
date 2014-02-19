@@ -19,7 +19,7 @@ ConnectRoles.prototype.use = function () {
   } else if (arguments.length === 2) {
     this.use2(arguments[0], arguments[1]);
   } else if (arguments.length === 3) {
-    use3.apply(this, arguments);
+    this.use3(arguments[0], arguments[1], arguments[2]);
   } else {
     throw new Error('use can have 1, 2 or 3 arguments, not ' + arguments.length);
   }
