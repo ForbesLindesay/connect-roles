@@ -1,9 +1,9 @@
 # Connect Roles
 <img src="http://i.imgur.com/opZKqAi.png" align="right"/>
 
-  Connect roles is designed to work with connect or express.  It is an authorisation provider, not an authentication provider.  It is designed to support context sensitive roles/abilities, through the use of middleware style authorisation strategies.
+Connect roles is designed to work with connect or express.  It is an authorisation provider, not an authentication provider.  It is designed to support context sensitive roles/abilities, through the use of middleware style authorisation strategies.
 
-  If you're looking for an authentication system I suggest you check out [passport.js](https://github.com/jaredhanson/passport)
+If you're looking for an authentication system I suggest you check out [passport.js](https://github.com/jaredhanson/passport), which works perfectly with this module.
 
 [![Build Status](https://secure.travis-ci.org/ForbesLindesay/connect-roles.png?branch=master)](http://travis-ci.org/ForbesLindesay/connect-roles)
 [![Dependency Status](https://gemnasium.com/ForbesLindesay/connect-roles.png)](https://gemnasium.com/ForbesLindesay/connect-roles)
@@ -17,22 +17,36 @@
 
 ```javascript
 var authentication = require('your-authentication-module-here');
-var user = require('connect-roles');
+var ConnectRoles = require('connect-roles');
 var express = require('express');
 var app = express();
 
+var user = new ConnectRoles({
+  failureHandler: function (req, res, action) {
+    // optional function to customise code that runs when
+    // user fails authorisation
+    var accept = req.headers.accept || '';
+    res.status(403);
+    if (~accept.indexOf('html')) {
+      res.render('access-denied', {action: action});
+    } else {
+      res.send('Access Denied - You don\'t have permission to: ' + action);
+    }
+  }
+});
+
 app.use(authentication)
-app.use(user);
+app.use(user.middleware());
 
 //anonymous users can only access the home page
 //returning false stops any more rules from being
 //considered
 user.use(function (req, action) {
-  if (!req.user.isAuthenticated) return action === 'access home page';
+  if (!req.isAuthenticated()) return action === 'access home page';
 })
 
 //moderator users can access private page, but
-//they might not be the only one so we don't return
+//they might not be the only ones so we don't return
 //false if the user isn't a moderator
 user.use('access private page', function (req) {
   if (req.user.role === 'moderator') {
@@ -44,17 +58,6 @@ user.use('access private page', function (req) {
 user.use(function (req) {
   if (req.user.role === 'admin') {
     return true;
-  }
-});
-
-//optionally controll the access denid page displayed
-user.setFailureHandler(function (req, res, action){
-  var accept = req.headers.accept || '';
-  res.status(403);
-  if (~accept.indexOf('html')) {
-    res.render('access-denied', {action: action});
-  } else {
-    res.send('Access Denied - You don\'t have permission to: ' + action);
   }
 });
 
@@ -74,37 +77,44 @@ app.listen(3000);
 
 ## API
 
+To access all methods, you must construct an instance via:
+
+```js
+var ConnectRoles = require('connect-roles');
+var roles = new ConnectRoles(options);
+```
+
 ### roles.use(fn(req, action))
 
-  Define an authorisation strategy which takes the current request and the action being performed.  fn may return `true`, `false` or `undefined`/`null`
+Define and authorisation strategy which takes the current request and the action being performed.  fn may return `true`, `false` or `undefined`/`null`
 
-  If `true` is returned then no further strategies are considred, and the user is **granted** access.
+If `true` is returned then no further strategies are considred, and the user is **granted** access.
 
-  If `false` is returned, no further strategies are considered, and the user is **denied** access.
+If `false` is returned, no further strategies are considered, and the user is **denied** access.
 
-  If `null`/`undefined` is returned, the next strategy is considerd.  If it is the last strategy then access is **denied**.
+If `null`/`undefined` is returned, the next strategy is considerd.  If it is the last strategy then access is **denied**.
 
 ### roles.use(action, fn(req))
 
-  The strategy `fn` is only used when the action is equal to `action`.  It has the same behaviour with regards to return values as `roles.use(fn(req, action))` (see above).
+The strategy `fn` is only used when the action is equal to `action`.  It has the same behaviour with regards to return values as `roles.use(fn(req, action))` (see above).
 
-  It is equivallent to calling:
+It is equivallent to calling:
 
-  ```javascript
-  roles.use(function (req, act) {
-    if (act === action) {
-      return fn(req);
-    }
-  });
-  ```
+```javascript
+roles.use(function (req, act) {
+  if (act === action) {
+    return fn(req);
+  }
+});
+```
 
-  **N.B.** The action must not start with a `/` character or it will call `roles.use(path, fn(req, action))`
+**N.B.** The action must not start with a `/` character
 
 ### roles.use(action, path, fn(req))
 
-  Path must be an express style route.  It will then attach any parameters to `req.params`.
+Path must be an express style route.  It will then attach any parameters to `req.params`.
 
-  e.g.
+e.g.
 
 ```javascript
 roles.use('edit user', '/user/:userID', function (req) {
@@ -112,20 +122,20 @@ roles.use('edit user', '/user/:userID', function (req) {
 });
 ```
 
-  Note that this authorisation strategy will only be used on routes that match `path`.
+Note that this authorisation strategy will only be used on routes that match `path`.
 
-  It is equivallent to calling:
+It is equivallent to calling:
 
 ```javascript
 var keys = [];
-var exp = pathToRegexp(path);
+var exp = pathToRegexp(path, key);
 roles.use(function (req, act) {
   var match;
   if (act === action && match = exp.exec(req.path)) {
     req = Object.create(req);
     req.params = Object.create(req.params || {});
     keys.forEach(function (key, i) {
-      req.params[key.name] = match[i+1];
+      req.params[key.name] = match[i + 1];
     });
     return fn(req);
   }
@@ -134,9 +144,9 @@ roles.use(function (req, act) {
 
 ### roles.can(action) and roles.is(action)
 
-  `can` and `is` are synonyms everywhere they appear.
+`can` and `is` are synonyms everywhere they appear.
 
-  You can use these as express route middleware:
+You can use these as express route middleware:
 
 ```javascript
 var user = roles;
@@ -149,13 +159,24 @@ app.get('/admin', user.is('admin'), function (req, res) {
 }
 ```
 
-### req.user.can(action) and req.user.is(action)
+If you want to skip only the current routes, you can also use `.here`
 
-  `can` and `is` are synonyms everywhere they appear.
+```js
+app.get('/', user.can('see admin page').here, function (req, res, next) {
+  res.render('admin-home-page');
+});
+app.get('/', function (req, res, next) {
+  res.render('default-home-page');
+});
+```
 
-  These functions return `true` or `false` depending on whether the user has access.
+### req.userCan(action) and req.userIs(action)
 
-  e.g.
+`can` and `is` are synonyms everywhere they appear.
+
+These functions return `true` or `false` depending on whether the user has access.
+
+e.g.
 
 ```javascript
 app.get('/', function (req, res) {
@@ -171,52 +192,27 @@ app.get('/', function (req, res) {
 
 ### user.can(action) and user.is(action)
 
-  Inside the views of an express application you may use `user.can` and `user.is` which are equivallent to `req.user.can` and `req.user.is`
+Inside the views of an express application you may use `userCan` and `userIs` which are equivallent to `req.userCan` and `req.userIs`
 
-  e.g.
+e.g.
 
 ```html
-<% if (user.can('impersonate')) { %>
+<% if (userCan('impersonate')) { %>
   <button id="impersonate">Impersonate</button>
 <% } %>
 ```
 
-  **N.B.** not displaying a button doesn't mean someone can't do the thing that the button would do if clicked.  The view is not where your security should go, but it is important for useability that you don't display buttons that will just result in 'access denied' where possible.
+or in jade:
 
-### roles.setFailureHandler(fn(req, res, action))
-
-  You can (and should) set the failure handler.  This is called whenever a user fails authorisation in route middleware.
-
-  Defaults to:
-
-```javascript
-user.setFailureHandler(function (req, res, action){
-  res.send(403);
-});
+```jade
+if userCan('impersonate')
+  button#impersonate Impersonate
 ```
 
-  There is no "next" by design, to stop you accidentally calling it and allowing someone into a restricted part of your site.  You are passed the action requested which caused them to be denied access.
-
-  You could using this to redirect the user or render an error page:
-
-```javascript
-user.setFailureHandler(function (req, res, action){
-  var accept = req.headers.accept || '';
-  res.status(403);
-  if(req.user.isAuthenticated){
-    if (~accept.indexOf('html')) {
-      res.render('access-denied', {action: action});
-    } else {
-      res.send('Access Denied - You don\'t have permission to: ' + action);
-    }
-  } else {
-    res.redirect('/login');
-  }
-});
-```
+**N.B.** not displaying a button doesn't mean someone can't do the thing that the button would do if clicked.  The view is not where your security should go, but it is important for useability that you don't display buttons that will just result in 'access denied'.
 
 ## License
 
-  MIT
-  
-  If you find it useful, a payment via [gittip](https://www.gittip.com/ForbesLindesay) would be appreciated.
+MIT
+
+If you find it useful, a payment via [gittip](https://www.gittip.com/ForbesLindesay) would be appreciated.

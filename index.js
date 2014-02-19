@@ -1,57 +1,45 @@
 "use strict";
 
-var debug = require('debug')('connect-roles');
+var Promise = require('promise');
 var ert = require('ert');
 var pathToRegexp = require('path-to-regexp');
 
-var functionList = [];
-var failureHandler = defaultFailureHandler;
-var defaultUser = {};
-
-function defaultFailureHandler(req, res, action) {
-  res.send(403);
+module.exports = ConnectRoles;
+function ConnectRoles(options) {
+  options = options || {};
+  this.functionList = [];
+  this.failureHandler = options.failureHandler || defaultFailureHandler;
+  this.async = options.async || false;
+  this.userProperty = options.userProperty || 'user';
 }
 
-var exports = module.exports = function middleware(req, res, next) {
-  if (res.locals) attachHelpers(req, res.locals);
-  attachHelpers(req, req);
-  next();
-};
-
-exports.reset = reset;
-function reset() {
-  functionList = [];
-  failureHandler = defaultFailureHandler;
-  defaultUser = {};
-}
-
-exports.use = use;
-function use() {
+ConnectRoles.prototype.use = function () {
   if (arguments.length === 1) {
-    use1.apply(this, arguments);
+    this.use1(arguments[0]);
   } else if (arguments.length === 2) {
-    use2.apply(this, arguments);
+    this.use2(arguments[0], arguments[1]);
   } else if (arguments.length === 3) {
     use3.apply(this, arguments);
   } else {
     throw new Error('use can have 1, 2 or 3 arguments, not ' + arguments.length);
   }
-}
+};
 
-function use1(fn) {
-  if (typeof fn !== 'function') throw new Error('Expected fn to be of type function');
-  functionList.push(fn);
-}
-function use2(action, fn) {
-  if (typeof action !== 'string') throw new Error('Expected action to be of type string');
-  if (action[0] === '/') throw new Error('action can\'t start with `/`');
-  use1(function (req, act) {
+ConnectRoles.prototype.use1 = function (fn) {
+  if (typeof fn !== 'function') throw new TypeError('Expected fn to be of type function');
+  this.functionList.push(fn);
+};
+
+ConnectRoles.prototype.use2 = function (action, fn) {
+  if (typeof action !== 'string') throw new TypeError('Expected action to be of type string');
+  if (action[0] === '/') throw new TypeError('action can\'t start with `/`');
+  this.use1(function (req, act) {
     if (act === action) {
       return fn(req);
     }
   });
-}
-function use3(action, path, fn) {
+};
+ConnectRoles.prototype.use3 = function (action, path, fn) {
   if (typeof path !== 'string') throw new Error('Expected path to be of type string');
   var keys = [];
   var exp = pathToRegexp(path, keys);
@@ -61,74 +49,120 @@ function use3(action, path, fn) {
       req = Object.create(req);
       req.params = Object.create(req.params || {});
       keys.forEach(function (key, i) {
-        req.params[key.name] = match[i+1];
+        req.params[key.name] = match[i + 1];
       });
       return fn(req);
     }
   });
 }
 
-exports.can = routeTester('can');
-exports.is = routeTester('is');
-exports.isAuthenticated = isAuthenticated;
-function isAuthenticated(req,res,next) {
-  if(arguments.length === 0){ return isAuthenticated; }
-  if (req.user && req.user.isAuthenticated === true){ next(); }
-  else if(req.user){ failureHandler(req, res, "isAuthenticated"); }
-  else { throw new Error("Request.user was null or undefined, include middleware"); }
+ConnectRoles.prototype.can = routeTester('can');
+ConnectRoles.prototype.is = routeTester('is');
+ConnectRoles.prototype.isAuthenticated = function () {
+  var msg = 'Expected req.isAuthenticated to be a function. '
+          + 'If you are using passport, make sure the passport '
+          + 'middleware comes first';
+  var res = function (req, res, next) {
+    if (typeof req.isAuthenticated !== 'function') {
+      throw new Error(msg);
+    }
+    if (req.isAuthenticated()) return next();
+    else return this.failureHandler(req, res, "isAuthenticated");
+  }.bind(this);
+  res.here = function (req, res, next) {
+    if (typeof req.isAuthenticated !== 'function') {
+      throw new Error(msg);
+    }
+    if (req.isAuthenticated()) return next();
+    else return next('route');
+  }.bind(this);
+  return res;
 };
-
-exports.setFailureHandler = setFailureHandler;
-function setFailureHandler(fn) {
-  failureHandler = fn;
-};
-
-exports.setDefaultUser = setDefaultUser;
-function setDefaultUser(user) {
-  defaultUser = user;
-};
-
-
-function tester(req, verb){
-  return function(action){
-    var result = null;
-    for (var i = 0; i<functionList.length && result === null; i++){
-      var fn = functionList[i];
+ConnectRoles.prototype.test = function (req, action) {
+  if (this.async) {
+    return this.functionList.reduce(function (accumulator, fn) {
+      return accumulator.then(function (result) {
+        if (typeof result === 'boolean') return result;
+        else return fn(req, action);
+      });
+    }, Promise.from(null)).then(function (result) {
+      if (typeof result == 'boolean') return result;
+      else return false;
+    });
+  } else {
+    for (var i = 0; i < this.functionList.length; i++){
+      var fn = this.functionList[i];
       var vote = fn(req, action);
       if (typeof vote === 'boolean') {
-        result = vote
+        return vote;
       }
     }
-    debug('Check Permission: ' + ((req.user && (req.user.id||req.user.name))||"user") +
-        "." + (verb || 'can') + "('" + action + "') -> " + (result === true));
-    return (result === true);
-  };
+    return false;
+  }
+};
+ConnectRoles.prototype.middleware = function (options) {
+  options = options || {};
+  var userProperty = options.userProperty || this.userProperty;
+  return function (req, res, next) {
+    if (req[userProperty] && res.locals && !res.locals[userProperty])
+      res.locals[userProperty] = req[userProperty];
+    if (req[userProperty]) {
+      req[userProperty].is = tester(this, req,'is');
+      req[userProperty].can = tester(this, req,'can');
+    }
+    req.userIs = tester(this, req, 'is');
+    req.userCan = tester(this, req, 'can');
+    if (res.locals) {
+      res.locals.userIs = tester(this, req, 'is');
+      res.locals.userCan = tester(this, req, 'can');
+      if (typeof req.isAuthenticated === 'function')
+        res.locals.isAuthenticated = req.isAuthenticated.bind(req);
+    }
+    next();
+  }.bind(this);
+};
+function tester(roles, req, verb) {
+  return function (action) {
+    var act = ert(req, action);
+    return roles.test(req, act)
+  }
 }
 
 function routeTester(verb) {
   return function (action){
-    return function (req, res, next) {
-      var act = ert(req, action);
-      if(tester(req,verb)(act)){
-        next();
-      }else{
-        //Failed authentication.
-        failureHandler(req, res, act);
-      }
-    };
+    function handle(onFail) {
+      return function (req, res, next) {
+        var act = ert(req, action);
+        if (this.async) {
+          this.test(req, act).done(function (result) {
+            if (result) {
+              next();
+            } else {
+              //Failed authentication.
+              onFail(req, res, next, act);
+            }
+          }.bind(this), next);
+        } else {
+          if(this.test(req, act)){
+            next();
+          }else{
+            //Failed authentication.
+            onFail(req, res, next, act);
+          }
+        }
+      }.bind(this);
+    }
+    var failureHandler = this.failureHandler;
+    var result = handle.call(this, function (req, res, next, act) {
+      failureHandler(req, res, act);
+    });
+    result.here = handle.call(this, function (req, res, next) {
+      next('route');
+    });
+    return result;
   };
 }
 
-function attachHelpers(req, obj) {
-  var oldUser = req.user;
-  obj.user = req.user || Object.create(defaultUser);
-  if(oldUser){
-    obj.user.isAuthenticated = true;
-  }else{
-    obj.user.isAuthenticated = false;
-  }
-  if(obj.user){
-    obj.user.is = tester(req,'is');
-    obj.user.can = tester(req,'can');
-  }
+function defaultFailureHandler(req, res, action) {
+  res.send(403);
 }
