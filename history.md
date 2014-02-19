@@ -1,3 +1,9 @@
+3.0.0 / 2014-02-19
+==================
+
+  * Complete redesign so it's not a singleton anymore
+  * Don't set the user when anonymous (this confused way too many people)
+
 2.1.0 / 2013-06-13
 ==================
 
