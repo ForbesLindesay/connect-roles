@@ -43,7 +43,7 @@ ConnectRoles.prototype.use3 = function (action, path, fn) {
   if (typeof path !== 'string') throw new Error('Expected path to be of type string');
   var keys = [];
   var exp = pathToRegexp(path, keys);
-  use2(action, function (req) {
+  this.use2(action, function (req) {
     var match;
     if (match = exp.exec(req.app.path().replace(/\/$/, '') + req.path)) {
       req = Object.create(req);
