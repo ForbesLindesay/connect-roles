@@ -6,8 +6,8 @@ Connect roles is designed to work with connect or express.  It is an authorisati
 If you're looking for an authentication system I suggest you check out [passport.js](https://github.com/jaredhanson/passport), which works perfectly with this module.
 
 [![Build Status](https://secure.travis-ci.org/ForbesLindesay/connect-roles.png?branch=master)](http://travis-ci.org/ForbesLindesay/connect-roles)
-[![Dependency Status](https://gemnasium.com/ForbesLindesay/connect-roles.png)](https://gemnasium.com/ForbesLindesay/connect-roles)
-[![NPM version](https://badge.fury.io/js/connect-roles.png)](http://badge.fury.io/js/connect-roles)
+[![Dependency Status](https://img.shields.io/gemnasium/ForbesLindesay/connect-roles.svg)](https://gemnasium.com/ForbesLindesay/connect-roles)
+[![NPM version](https://img.shields.io/npm/v/connect-roles.svg)](http://badge.fury.io/js/connect-roles)
 
 ## Installation
 
