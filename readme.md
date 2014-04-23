@@ -88,7 +88,7 @@ var roles = new ConnectRoles(options);
 
 Define and authorisation strategy which takes the current request and the action being performed.  fn may return `true`, `false` or `undefined`/`null`
 
-If `true` is returned then no further strategies are considred, and the user is **granted** access.
+If `true` is returned then no further strategies are considered, and the user is **granted** access.
 
 If `false` is returned, no further strategies are considered, and the user is **denied** access.
 
