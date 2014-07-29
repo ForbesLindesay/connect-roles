@@ -11,6 +11,7 @@ function ConnectRoles(options) {
   this.failureHandler = options.failureHandler || defaultFailureHandler;
   this.async = options.async || false;
   this.userProperty = options.userProperty || 'user';
+  this.matchRelativePaths = options.matchRelativePaths || false;
 }
 
 ConnectRoles.prototype.use = function () {
@@ -40,12 +41,20 @@ ConnectRoles.prototype.use2 = function (action, fn) {
   });
 };
 ConnectRoles.prototype.use3 = function (action, path, fn) {
+  var self = this;
   if (typeof path !== 'string') throw new Error('Expected path to be of type string');
   var keys = [];
   var exp = pathToRegexp(path, keys);
   this.use2(action, function (req) {
+    var pathToMatch = null;
+    if(self.matchRelativePaths === true) {
+      pathToMatch = req.url;
+    } else {
+      pathToMatch = req.app.path().replace(/\/$/, '') + req.path;
+    }
+
     var match;
-    if (match = exp.exec(req.app.path().replace(/\/$/, '') + req.path)) {
+    if (match = exp.exec(pathToMatch)) {
       req = Object.create(req);
       req.params = Object.create(req.params || {});
       keys.forEach(function (key, i) {
