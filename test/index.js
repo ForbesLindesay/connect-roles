@@ -121,7 +121,7 @@ describe('can middleware', function () {
       var roles = new Roles();
       var req = request();
       var res = {};
-      roles.use(function (req, action) { assert.strictEqual(action, 'any'); return true; });
+      roles.use(function (req, res, action) { assert.strictEqual(action, 'any'); return true; });
       roles.can('any')(req, res, function (err) {
         if (err) return done(err);
         done();
@@ -131,7 +131,7 @@ describe('can middleware', function () {
   describe('when the user is not authenticated', function () {
     it('fails the test', function (done) {
       var roles = new Roles();
-      roles.use(function (req, action) { assert.strictEqual(action, 'any'); return false; });
+      roles.use(function (req, res, action) { assert.strictEqual(action, 'any'); return false; });
       function send(code) {
         assert.strictEqual(code, 403);
         done();
@@ -149,7 +149,7 @@ describe('can middleware', function () {
           done();
         }
       });
-      roles.use(function (req, action) { assert.strictEqual(action, 'any'); return false; });
+      roles.use(function (req, res, action) { assert.strictEqual(action, 'any'); return false; });
       var req = request();
       var res = {};
       roles.can('any')(req, res, notCalled('next'));

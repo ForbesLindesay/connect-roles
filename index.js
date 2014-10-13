@@ -33,9 +33,9 @@ ConnectRoles.prototype.use1 = function (fn) {
 ConnectRoles.prototype.use2 = function (action, fn) {
   if (typeof action !== 'string') throw new TypeError('Expected action to be of type string');
   if (action[0] === '/') throw new TypeError('action can\'t start with `/`');
-  this.use1(function (req, act) {
+  this.use1(function (req, res, act) {
     if (act === action) {
-      return fn(req);
+      return fn(req, res);
     }
   });
 };
@@ -43,7 +43,7 @@ ConnectRoles.prototype.use3 = function (action, path, fn) {
   if (typeof path !== 'string') throw new Error('Expected path to be of type string');
   var keys = [];
   var exp = pathToRegexp(path, keys);
-  this.use2(action, function (req) {
+  this.use2(action, function (req, res) {
     var match;
     if (match = exp.exec(req.app.path().replace(/\/$/, '') + req.path)) {
       req = Object.create(req);
@@ -51,7 +51,7 @@ ConnectRoles.prototype.use3 = function (action, path, fn) {
       keys.forEach(function (key, i) {
         req.params[key.name] = match[i + 1];
       });
-      return fn(req);
+      return fn(req, res);
     }
   });
 }
@@ -78,12 +78,12 @@ ConnectRoles.prototype.isAuthenticated = function () {
   }.bind(this);
   return res;
 };
-ConnectRoles.prototype.test = function (req, action) {
+ConnectRoles.prototype.test = function (req, res, action) {
   if (this.async) {
     return this.functionList.reduce(function (accumulator, fn) {
       return accumulator.then(function (result) {
         if (typeof result === 'boolean') return result;
-        else return fn(req, action);
+        else return fn(req, res, action);
       });
     }, Promise.from(null)).then(function (result) {
       if (typeof result == 'boolean') return result;
@@ -92,7 +92,7 @@ ConnectRoles.prototype.test = function (req, action) {
   } else {
     for (var i = 0; i < this.functionList.length; i++){
       var fn = this.functionList[i];
-      var vote = fn(req, action);
+      var vote = fn(req, res, action);
       if (typeof vote === 'boolean') {
         return vote;
       }
@@ -107,24 +107,24 @@ ConnectRoles.prototype.middleware = function (options) {
     if (req[userProperty] && res.locals && !res.locals[userProperty])
       res.locals[userProperty] = req[userProperty];
     if (req[userProperty]) {
-      req[userProperty].is = tester(this, req,'is');
-      req[userProperty].can = tester(this, req,'can');
+      req[userProperty].is = tester(this, req, res,'is');
+      req[userProperty].can = tester(this, req, res,'can');
     }
-    req.userIs = tester(this, req, 'is');
-    req.userCan = tester(this, req, 'can');
+    req.userIs = tester(this, req, res, 'is');
+    req.userCan = tester(this, req, res, 'can');
     if (res.locals) {
-      res.locals.userIs = tester(this, req, 'is');
-      res.locals.userCan = tester(this, req, 'can');
+      res.locals.userIs = tester(this, req, res, 'is');
+      res.locals.userCan = tester(this, req, res, 'can');
       if (typeof req.isAuthenticated === 'function')
         res.locals.isAuthenticated = req.isAuthenticated.bind(req);
     }
     next();
   }.bind(this);
 };
-function tester(roles, req, verb) {
+function tester(roles, req, res, verb) {
   return function (action) {
     var act = ert(req, action);
-    return roles.test(req, act)
+    return roles.test(req, res, act)
   }
 }
 
@@ -134,7 +134,7 @@ function routeTester(verb) {
       return function (req, res, next) {
         var act = ert(req, action);
         if (this.async) {
-          this.test(req, act).done(function (result) {
+          this.test(req, res, act).done(function (result) {
             if (result) {
               next();
             } else {
@@ -143,7 +143,7 @@ function routeTester(verb) {
             }
           }.bind(this), next);
         } else {
-          if(this.test(req, act)){
+          if(this.test(req, res, act)){
             next();
           }else{
             //Failed authentication.
