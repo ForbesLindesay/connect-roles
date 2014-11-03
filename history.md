@@ -1,3 +1,9 @@
+3.1.0 / 2014-11-03
+==================
+
+  * Update dependencies
+  * Add `matchRelativePaths` option
+
 3.0.3 / 2014-04-22
 ==================
 
