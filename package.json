@@ -27,8 +27,8 @@
     "everyauth"
   ],
   "dependencies": {
-    "path-to-regexp": "0.1.2",
-    "ert": "1.0.1",
-    "promise": "~4.0.0"
+    "path-to-regexp": "^1.0.1",
+    "ert": "^1.0.1",
+    "promise": "^6.0.1"
   }
 }
