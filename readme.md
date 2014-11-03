@@ -84,6 +84,13 @@ var ConnectRoles = require('connect-roles');
 var roles = new ConnectRoles(options);
 ```
 
+options:
+
+ - failureHandler {Function} - a function that takes (req, res) when the user has failed authorisation
+ - async {Boolean} - experimental support for async rules
+ - userProperty {String} - the property name for the user object on req.  Defaults to "user"
+ - matchRelativePaths {Boolean} - by default, rules use absolute paths from the root of the application.
+
 ### roles.use(fn(req, action))
 
 Define and authorisation strategy which takes the current request and the action being performed.  fn may return `true`, `false` or `undefined`/`null`
