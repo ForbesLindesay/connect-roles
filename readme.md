@@ -8,6 +8,7 @@ If you're looking for an authentication system I suggest you check out [passport
 [![Build Status](https://secure.travis-ci.org/ForbesLindesay/connect-roles.png?branch=master)](http://travis-ci.org/ForbesLindesay/connect-roles)
 [![Dependency Status](https://img.shields.io/gemnasium/ForbesLindesay/connect-roles.svg)](https://gemnasium.com/ForbesLindesay/connect-roles)
 [![NPM version](https://img.shields.io/npm/v/connect-roles.svg)](http://badge.fury.io/js/connect-roles)
+[![Gratipay](https://img.shields.io/gratipay/ForbesLindesay.svg)](https://gratipay.com/ForbesLindesay)
 
 ## Installation
 
