@@ -94,7 +94,7 @@ ConnectRoles.prototype.test = function (req, action) {
         if (typeof result === 'boolean') return result;
         else return fn(req, action);
       });
-    }, Promise.from(null)).then(function (result) {
+    }, Promise.resolve(null)).then(function (result) {
       if (typeof result == 'boolean') return result;
       else return false;
     });
