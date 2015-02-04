@@ -1,3 +1,8 @@
+3.1.1 / 2015-02-04
+==================
+
+Fix use of deprecated `Promise.from` method (only impacts use of the async api)
+
 3.1.0 / 2014-11-03
 ==================
 
