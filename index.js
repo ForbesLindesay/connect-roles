@@ -173,5 +173,5 @@ function routeTester(verb) {
 }
 
 function defaultFailureHandler(req, res, action) {
-  res.send(403);
+  (res.sendStatus || res.send).bind(res)(403);
 }
