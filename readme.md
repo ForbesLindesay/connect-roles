@@ -188,9 +188,9 @@ e.g.
 
 ```javascript
 app.get('/', function (req, res) {
-  if (req.user.is('admin')) {
+  if (req.userIs('admin')) {
     res.render('home/admin');
-  } else if (user.can('login')) {
+  } else if (req.userCan('login')) {
     res.render('home/login');
   } else {
     res.render('home');
