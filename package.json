@@ -29,6 +29,6 @@
   "dependencies": {
     "path-to-regexp": "^1.0.1",
     "ert": "^1.0.1",
-    "promise": "^7.1.1"
+    "promise": "^8.0.1"
   }
 }
