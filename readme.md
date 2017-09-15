@@ -9,7 +9,6 @@ If you're looking for an authentication system I suggest you check out [passport
 [![Build Status](https://secure.travis-ci.org/ForbesLindesay/connect-roles.png?branch=master)](http://travis-ci.org/ForbesLindesay/connect-roles)
 [![Dependency Status](https://img.shields.io/david/ForbesLindesay/connect-roles.svg)](https://david-dm.org/ForbesLindesay/connect-roles)
 [![NPM version](https://img.shields.io/npm/v/connect-roles.svg)](https://www.npmjs.com/package/connect-roles)
-[![Gratipay](https://img.shields.io/gratipay/ForbesLindesay.svg)](https://gratipay.com/ForbesLindesay)
 
 ## Installation
 
@@ -224,4 +223,4 @@ if userCan('impersonate')
 
 MIT
 
-If you find it useful, a payment via [gittip](https://www.gittip.com/ForbesLindesay) would be appreciated.
+<a target='_blank' rel='nofollow' href='https://app.codesponsor.io/link/gg9sZwctSLxyov1sJwW6pfyS/ForbesLindesay/connect-roles'>  <img alt='Sponsor' width='888' height='68' src='https://app.codesponsor.io/embed/gg9sZwctSLxyov1sJwW6pfyS/ForbesLindesay/connect-roles.svg' /></a>
