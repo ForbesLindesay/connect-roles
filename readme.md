@@ -1,5 +1,7 @@
 # Connect Roles
 
+<a target='_blank' rel='nofollow' href='https://app.codesponsor.io/link/gg9sZwctSLxyov1sJwW6pfyS/ForbesLindesay/connect-roles'>  <img alt='Sponsor' width='888' height='68' src='https://app.codesponsor.io/embed/gg9sZwctSLxyov1sJwW6pfyS/ForbesLindesay/connect-roles.svg' /></a>
+
 <img src="http://i.imgur.com/opZKqAi.png" align="right"/>
 
 Connect roles is designed to work with connect or express.  It is an authorisation provider, not an authentication provider.  It is designed to support context sensitive roles/abilities, through the use of middleware style authorisation strategies.
@@ -222,5 +224,3 @@ if userCan('impersonate')
 ## License
 
 MIT
-
-<a target='_blank' rel='nofollow' href='https://app.codesponsor.io/link/gg9sZwctSLxyov1sJwW6pfyS/ForbesLindesay/connect-roles'>  <img alt='Sponsor' width='888' height='68' src='https://app.codesponsor.io/embed/gg9sZwctSLxyov1sJwW6pfyS/ForbesLindesay/connect-roles.svg' /></a>
