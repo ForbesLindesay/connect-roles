@@ -9,7 +9,7 @@
   },
   "main": "./index",
   "devDependencies": {
-    "mocha": "*"
+    "mocha": "6.0.2"
   },
   "scripts": {
     "test": "mocha -R spec"
